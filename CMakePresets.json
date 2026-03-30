@@ -1,0 +1,18 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-vcpkg",
+      "displayName": "Windows x64 with vcpkg",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "C:/Users/david/VCPKG/vcpkg/scripts/buildsystems/vcpkg.cmake"
+      }
+    }
+  ]
+}
