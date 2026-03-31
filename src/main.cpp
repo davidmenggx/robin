@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
   SDL_Window* window{nullptr};
   SDL_Renderer* renderer{nullptr};
 
-  if (!SDL_CreateWindowAndRenderer("sizzle", kWidth, kWidth, 0, &window, &renderer)) {
+  if (!SDL_CreateWindowAndRenderer("robin", kWidth, kWidth, 0, &window, &renderer)) {
     SDL_Log("Window or renderer error: %s", SDL_GetError());
     SDL_Quit();
     return 1;
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
       }
     }
 
-    SDL_SetRenderDrawColor(renderer, 100, 149, 237, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
     SDL_RenderPresent(renderer);

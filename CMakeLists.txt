@@ -5,7 +5,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("sizzle")
+project ("robin")
 
 find_package(SDL3 CONFIG REQUIRED)
 
@@ -21,12 +21,12 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
   "include/*.h"
 )
 
-add_executable(sizzle ${SOURCES} ${HEADERS})
+add_executable(robin ${SOURCES} ${HEADERS})
 
-target_link_libraries(sizzle PRIVATE SDL3::SDL3)
+target_link_libraries(robin PRIVATE SDL3::SDL3)
 
-target_include_directories(sizzle PRIVATE include/sizzle)
+target_include_directories(robin PRIVATE include/robin)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET sizzle PROPERTY CXX_STANDARD 20)
+  set_property(TARGET robin PROPERTY CXX_STANDARD 20)
 endif()
