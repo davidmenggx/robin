@@ -1,8 +1,7 @@
+#include "constants.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-
-constexpr int kWidth{1000};
-constexpr int kHeight{1000};
 
 int main(int argc, char** argv) { 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -13,7 +12,8 @@ int main(int argc, char** argv) {
   SDL_Window* window{nullptr};
   SDL_Renderer* renderer{nullptr};
 
-  if (!SDL_CreateWindowAndRenderer("robin", kWidth, kWidth, 0, &window, &renderer)) {
+  if (!SDL_CreateWindowAndRenderer("robin", constants::kWidth, constants::kWidth,
+                                   0, &window, &renderer)) {
     SDL_Log("Window or renderer error: %s", SDL_GetError());
     SDL_Quit();
     return 1;

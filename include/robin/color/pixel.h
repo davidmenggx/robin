@@ -1,0 +1,10 @@
+#pragma once
+
+namespace ff {
+  struct Pixel {
+    float frequency_{};
+    float red_{};
+    float green_{};
+    float blue_{};
+  };
+}
