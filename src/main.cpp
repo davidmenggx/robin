@@ -1,49 +1,56 @@
+#include "color/accumulation.h"
 #include "constants.h"
+#include "engine/cdf.h"
+#include "engine/engine.h"
+#include "generation/flame.h"
+#include "generation/transformation.h"
+#include "generation/variation.h"
+
+#include <iostream>
+#include <random>
+#include <vector>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+using namespace ff;
+
 int main(int argc, char** argv) { 
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
-    SDL_Log("SDL initialization error: %s", SDL_GetError());
-    return 1;
-  }
+  // some hard coded transformations for initial testing
+  Transformation t1{{0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f},
+                    1.0f,
+                    0.0f,
+                    {{VariationType::kLinear, 1.0f}}};
 
-  SDL_Window* window{nullptr};
-  SDL_Renderer* renderer{nullptr};
+  Transformation t2{{0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f},
+                    1.0f,
+                    0.5f,
+                    {{VariationType::kLinear, 1.0f}}};
 
-  if (!SDL_CreateWindowAndRenderer("robin", constants::kWidth, constants::kWidth,
-                                   0, &window, &renderer)) {
-    SDL_Log("Window or renderer error: %s", SDL_GetError());
-    SDL_Quit();
-    return 1;
-  }
+  Transformation t3{{0.5f, 0.0f, 0.25f, 0.0f, 0.5f, 0.5f},
+                    1.0f,
+                    1.0f,
+                    {{VariationType::kLinear, 1.0f}}};
 
-  bool running{true};
-  SDL_Event event{};
+  std::vector<Transformation> test_transformations{{t1, t2, t3}};
 
-  while (running) {
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_EVENT_QUIT || 
-          (event.type == SDL_EVENT_KEY_DOWN && 
-              event.key.key == SDLK_ESCAPE)) {
-        running = false;
-      }
-    }
+  Flame flame{test_transformations};
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
+  std::vector<float> cdf{GenerateCDF(test_transformations)};
 
-    SDL_RenderPresent(renderer);
-  }
+  Accumulation buffer{};
 
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
+  std::random_device device{};
+  std::mt19937 generator(device());
+  std::uniform_real_distribution<float> distribution{0, 1};
 
-  window = nullptr;
-  renderer = nullptr;
+  std::cout << "starting\n";
 
-  SDL_Quit();
+  Iterate(flame, cdf, buffer, generator, distribution, constants::kIterations);
+
+  std::cout << "done\n";
+
+  // TODO: create some type of output for us to verify the results
 
   return 0;
 }

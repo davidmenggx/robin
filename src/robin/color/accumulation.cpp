@@ -8,6 +8,10 @@ using namespace ff;
 Accumulation::Accumulation() 
 : histogram_(constants::kWidth * constants::kHeight) {}
 
-[[nodiscard]] Pixel& Accumulation::get(int32_t row, int32_t col) {
+[[nodiscard]] PixelAccumulation& Accumulation::Get(uint32_t row, uint32_t col) {
   return histogram_[row * constants::kWidth + col];
+}
+
+void Accumulation::Accumulate(uint32_t row, uint32_t col) {
+  // TODO
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ff {
-  struct Pixel {
+  struct PixelAccumulation {
     float frequency_{};
     float red_{};
     float green_{};

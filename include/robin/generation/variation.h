@@ -15,4 +15,7 @@ namespace ff {
     VariationType type_{};
     float weight_{}; // how much this given variation contributes to the final output point
   };
-}
+
+  void ApplyVariation(VariationType type, float x_in, float y_in, float r,
+                      float theta, float phi, float& x_out, float& y_out);
+  }

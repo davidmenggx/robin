@@ -1,7 +1,7 @@
 #pragma once
 
 #include "constants.h"
-#include "color/pixel.h"
+#include "color/pixel_accumulation.h"
 
 #include <cstdint>
 #include <vector>
@@ -11,10 +11,11 @@ namespace ff {
    public:
     Accumulation();
 
-    ff::Pixel& get(int32_t row, int32_t col);
+    PixelAccumulation& Get(uint32_t row, uint32_t col);
 
+    void Accumulate(uint32_t row, uint32_t col);
    private:
-    std::vector<ff::Pixel> histogram_{};
+    std::vector<PixelAccumulation> histogram_{};
   };
 }
 
