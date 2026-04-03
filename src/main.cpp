@@ -1,11 +1,11 @@
 #include "color/accumulation.h"
-#include "color/pixel_accumulation.h"
 #include "constants.h"
 #include "engine/cdf.h"
 #include "engine/engine.h"
 #include "generation/flame.h"
 #include "generation/transformation.h"
 #include "generation/variation.h"
+#include "render/renderer.h"
 
 #include <iostream>
 #include <random>
@@ -18,26 +18,32 @@ using namespace ff;
 
 int main(int argc, char** argv) {
 	// some hard coded transformations for initial testing
-	// this is the sierpinski triangle
-	Transformation t1{ {0.5f, 0.0f, 0.0f,
-						0.0f, 0.5f, 0.0f},
-					  1.0f,
-					  0.0f,
-					  {{VariationType::kLinear, 1.0f}} };
+	// a cooler transformation
+	Transformation t1{ { 0.75f,  0.15f, 0.00f,
+						 -0.15f,  0.75f, 0.00f},
+						 1.0f,
+						 0.0f,
+						 {{VariationType::kSpherical, 0.6f}, {VariationType::kLinear, 0.4f}} };
 
-	Transformation t2{ {0.5f, 0.0f, 0.5f,
-						0.0f, 0.5f, 0.0f},
-					  1.0f,
-					  0.5f,
-					  {{VariationType::kLinear, 1.0f}} };
+	Transformation t2{ { 0.50f,  0.00f,  1.20f,
+						 0.00f,  0.50f, -0.80f},
+						 1.0f,
+						 0.33f,
+						 {{VariationType::kSinusoidal, 0.8f}, {VariationType::kLinear, 0.2f}} };
 
-	Transformation t3{ {0.5f, 0.0f, 0.25f,
-						0.0f, 0.5f, 0.43f},
-					  1.0f,
-					  1.0f,
-					  {{VariationType::kLinear, 1.0f}} };
+	Transformation t3{ { 0.40f, -0.40f, -1.00f,
+						 0.40f,  0.40f,  0.50f},
+						 1.0f,
+						 0.66f,
+						 {{VariationType::kHorseshoe, 0.5f}, {VariationType::kLinear, 0.5f}} };
 
-	std::vector<Transformation> test_transformations{ {t1, t2, t3} };
+	Transformation t4{ { 0.60f,  0.40f,  0.00f,
+						-0.40f,  0.60f,  1.20f},
+						 1.0f,
+						 1.0f,
+						 {{VariationType::kSwirl, 0.4f}, {VariationType::kLinear, 0.6f}} };
+
+	std::vector<Transformation> test_transformations{ {t1, t2, t3, t4} };
 
 	Flame flame{ test_transformations };
 
@@ -49,9 +55,17 @@ int main(int argc, char** argv) {
 	std::mt19937 generator(device());
 	std::uniform_real_distribution<float> distribution{ 0, 1 };
 
+	Renderer renderer{ "robin" };
+
 	std::cout << "starting\n";
 
-	Iterate(flame, cdf, buffer, generator, distribution, constants::kIterations);
+	int cumulative_iterations{};
+	while (cumulative_iterations < constants::kIterations && renderer.PollEvents()) {
+		Iterate(flame, cdf, buffer, generator, distribution, constants::kIterationsPerUpdate);
+		renderer.Update(buffer);
+
+		cumulative_iterations += constants::kIterationsPerUpdate;
+	}
 
 	std::cout << "done\n";
 

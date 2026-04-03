@@ -1,7 +1,7 @@
 #include "color/accumulation.h"
 #include "color/color.h"
 #include "constants.h"
-#include "render/render.h"
+#include "render/tonemap.h"
 
 #include <algorithm>
 #include <cmath>

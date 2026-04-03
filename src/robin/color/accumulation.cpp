@@ -29,8 +29,8 @@ Accumulation::Accumulation(std::vector<GradientPoint>& gradient_points)
 
 std::pair<int, int> Accumulation::ToPixels(float x, float y) {
 	return {
-	  static_cast<int>(x * constants::kPixelsPerUnit),
-	  static_cast<int>(y * constants::kPixelsPerUnit)
+	  static_cast<int>(x * constants::kPixelsPerUnit + (constants::kWidth / 2.0f)),
+	  static_cast<int>(y * constants::kPixelsPerUnit + (constants::kHeight / 2.0f))
 	};
 }
 

@@ -11,10 +11,11 @@ namespace ff {
 	};
 
 	// TEMPORARY GRADIENT POINTS, MOVE SOMEWHERE ELSE!!!!:
+	// cooler colorscheme
 	inline std::vector<GradientPoint> kGradientPoints = {
-		{0.0, 10, 0, 40},      // deep purple
-		{0.3, 180, 0, 220},    // violet
-		{0.6, 255, 100, 0},    // orange
-		{1.0, 255, 255, 200},  // pale yellow
+		{0.0f,   0,  15,  30},
+		{0.35f, 10,  80, 160},
+		{0.65f, 20, 220, 200},
+		{1.0f, 220, 255, 255},
 	};
 }
