@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace ff {
-  struct Flame {
-    std::vector<Transformation> transformations_{};
-  };
+	struct Flame {
+		std::vector<Transformation> transformations_{};
+	};
 }

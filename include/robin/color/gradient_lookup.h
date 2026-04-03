@@ -7,16 +7,16 @@
 #include <array>
 #include <vector>
 
-namespace ff{
-  class GradientLookup {
-  public:
-    GradientLookup() = delete;
+namespace ff {
+	class GradientLookup {
+	public:
+		GradientLookup() = delete;
 
-    GradientLookup(std::vector<GradientPoint>& gradient_points);
+		GradientLookup(std::vector<GradientPoint>& gradient_points);
 
-    Color Sample(float color);
+		Color Sample(float color);
 
-  private:
-    std::array<Color, constants::kGradientLookupSize> lookup_table_{};
-  };
+	private:
+		std::array<Color, constants::kGradientLookupSize> lookup_table_{};
+	};
 }
