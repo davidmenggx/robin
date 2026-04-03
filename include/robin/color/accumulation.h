@@ -15,11 +15,13 @@ namespace ff {
 
 		[[nodiscard]] PixelAccumulation& Get(int x, int y);
 
+		[[nodiscard]] int GetMaxFrequency() const;
+
 		void Accumulate(float x, float y, float color);
 
-		// THIS IS PUBLIC TEMPORARILY FOR DEBUG PURPOSES!!!
-		std::vector<PixelAccumulation> histogram_{};
 	private:
+		std::vector<PixelAccumulation> histogram_{};
+
 		GradientLookup gradient_lookup_;
 
 		std::pair<int, int> ToPixels(float x, float y);

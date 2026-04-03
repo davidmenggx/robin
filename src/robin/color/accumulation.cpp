@@ -4,6 +4,7 @@
 #include "color/pixel_accumulation.h"
 #include "constants.h"
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -16,6 +17,14 @@ Accumulation::Accumulation(std::vector<GradientPoint>& gradient_points)
 
 [[nodiscard]] PixelAccumulation& Accumulation::Get(int x, int y) {
 	return histogram_[y * constants::kWidth + x];
+}
+
+[[nodiscard]] int Accumulation::GetMaxFrequency() const {
+	int max_frequency{};
+	for (const auto& pixel : histogram_) {
+		max_frequency = std::max(max_frequency, pixel.frequency_);
+	}
+	return max_frequency;
 }
 
 std::pair<int, int> Accumulation::ToPixels(float x, float y) {
