@@ -13,7 +13,8 @@ using namespace ff;
 
 const Transformation& ff::ChooseTransformation(
     const std::vector<float>& cdf,
-    std::mt19937 generator, std::uniform_real_distribution<float> distribution,
+    std::mt19937& generator, 
+    std::uniform_real_distribution<float>& distribution,
     const Flame& flame
     ) {
   float random{distribution(generator)};
@@ -32,10 +33,10 @@ void ff::ApplyVariations(
   float x_accumulated{}, y_accumulated{};
 
   for (const Variation& variation : variations) {
-    float x_out{}, y_out{};
-    ApplyVariation(variation.type_, x_in, y_in, radius, theta, phi, x_out, y_out);
-    x_accumulated += variation.weight_ * x_out;
-    y_accumulated += variation.weight_ * y_out;
+    float x_var{}, y_var{};
+    ApplyVariation(variation.type_, x_in, y_in, radius, theta, phi, x_var, y_var);
+    x_accumulated += variation.weight_ * x_var;
+    y_accumulated += variation.weight_ * y_var;
   }
 
   x_out = x_accumulated;
@@ -45,9 +46,9 @@ void ff::ApplyVariations(
 void ff::Iterate(const Flame& flame,
 	const std::vector<float>& cdf,
 	Accumulation& buffer,
-	std::mt19937 generator,
-	std::uniform_real_distribution<float> distribution,
-	uint64_t iterations
+	std::mt19937& generator,
+	std::uniform_real_distribution<float>& distribution,
+	int iterations
 	) {
   // it doesn't rlly matter where we start at (see next lines)
   // for now our point starts with -1 <= x, y <= 1
@@ -60,7 +61,7 @@ void ff::Iterate(const Flame& flame,
   // not be included in the final drawing (b/c it's ugly).
   // So I set the point in motion without accumulating color to settle
   // into some converged state
-  for (uint8_t i{0}; i < 20; ++i) {
+  for (int i{0}; i < 20; ++i) {
     const Transformation& transformation{
         ChooseTransformation(cdf, generator, distribution, flame)};
 
@@ -73,10 +74,10 @@ void ff::Iterate(const Flame& flame,
 
     ApplyVariations(transformation.variations_, x_affine, y_affine, x, y);
 
-	color = (color * transformation.color_) * constants::kColorSpeed;
+	color = (color + transformation.color_) * 0.5f;
   }
 
-  for (uint64_t i{0}; i < iterations; ++i) {
+  for (int i{0}; i < iterations; ++i) {
     const Transformation& transformation{
         ChooseTransformation(cdf, generator, distribution, flame)};
 
@@ -87,8 +88,8 @@ void ff::Iterate(const Flame& flame,
 
     ApplyVariations(transformation.variations_, x_affine, y_affine, x, y);
 
-    color = (color * transformation.color_) * constants::kColorSpeed;
+    color = (color + transformation.color_) * 0.5f;
 
-    // TODO: pixel stuff
+    buffer.Accumulate(x, y, color);
   }
 }

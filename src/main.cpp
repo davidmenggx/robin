@@ -6,6 +6,9 @@
 #include "generation/transformation.h"
 #include "generation/variation.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <format>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -17,6 +20,7 @@ using namespace ff;
 
 int main(int argc, char** argv) { 
   // some hard coded transformations for initial testing
+  // this is the sierpinski triangle
   Transformation t1{{0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f},
                     1.0f,
                     0.0f,
@@ -50,7 +54,64 @@ int main(int argc, char** argv) {
 
   std::cout << "done\n";
 
-  // TODO: create some type of output for us to verify the results
+  // DEBUG OUTPUTS:
+  
+  // Make sure the histogram is ok
+  int total_hits{};
+  int max_density{};
+  int zero_pixels{};
+
+  for (auto& pixel : buffer.histogram_) {
+    total_hits += pixel.frequency_;
+    max_density = std::max(max_density, pixel.frequency_);
+    if (pixel.frequency_ == 0) {
+      ++zero_pixels;
+    }
+  }
+
+  int nonzero_pixels{static_cast<int>(buffer.histogram_.size() - zero_pixels)};
+  std::cout << std::format("Total hits: {}\nMax density: {}\nZero pixels: {}\n",
+                           total_hits, max_density, zero_pixels);
+
+  // Make sure the colors are ok
+  float min_red{1.0f};
+  float max_red{};
+
+  float min_green{1.0f};
+  float max_green{};
+
+  float min_blue{1.0f};
+  float max_blue{};
+
+  int invalid_color{};
+
+  for (auto& pixel : buffer.histogram_) {
+    if (pixel.frequency_ == 0) {
+      continue;
+    }
+    if (pixel.red_ < 0.0f || pixel.red_ > 1.0f 
+        || pixel.green_ < 0.0f || pixel.green_ > 1.0f
+        || pixel.blue_ < 0.0f || pixel.blue_ > 1.0f
+        ) {
+      ++invalid_color;
+    }
+    min_red = std::min(min_red, pixel.red_);
+    max_red = std::max(max_red, pixel.red_);
+
+    min_green = std::min(min_green, pixel.green_);
+    max_green = std::max(max_green, pixel.green_);
+
+    min_blue = std::min(min_blue, pixel.blue_);
+    max_blue = std::max(max_blue, pixel.blue_);
+  }
+
+  std::cout << std::format(
+      "Invalid colors: {}\nReds: [{}, {}]\nGreens: [{}, {}]\nBlues: [{}, "
+      "{}]\n",
+      invalid_color, 
+      min_red, max_red, 
+      min_green, max_green, 
+      min_blue, max_blue);
 
   return 0;
 }

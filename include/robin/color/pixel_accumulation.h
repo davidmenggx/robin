@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstdint>
+
 namespace ff {
   struct PixelAccumulation {
-    float frequency_{};
+    int frequency_{};
     float red_{};
     float green_{};
     float blue_{};

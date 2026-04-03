@@ -1,21 +1,29 @@
 #pragma once
 
-#include "constants.h"
+#include "color/gradient_lookup.h"
+#include "color/gradient_point.h"
 #include "color/pixel_accumulation.h"
 
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 namespace ff {
   class Accumulation {
    public:
-    Accumulation();
+    explicit Accumulation(
+        std::vector<GradientPoint>& gradient_points = kGradientPoints);
 
-    PixelAccumulation& Get(uint32_t row, uint32_t col);
+    [[nodiscard]] PixelAccumulation& Get(int x, int y);
 
-    void Accumulate(uint32_t row, uint32_t col);
-   private:
+    void Accumulate(float x, float y, float color);
+
+    // THIS IS PUBLIC TEMPORARILY FOR DEBUG PURPOSES!!!
     std::vector<PixelAccumulation> histogram_{};
+   private:
+    GradientLookup gradient_lookup_;
+
+    std::pair<int32_t, int32_t> ToPixels(float x, float y);
   };
 }
 

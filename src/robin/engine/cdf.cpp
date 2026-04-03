@@ -31,9 +31,8 @@ std::vector<float> ff::GenerateCDF(
 
 std::size_t ff::DrawCDF(const std::vector<float> cdf, float random) {
   // Rn this is a naive linear search, improve to better search algorithm
-
   for (std::size_t i{0}; i < std::size(cdf); ++i) {
-    if (random > cdf[i]) {
+    if (random <= cdf[i]) {
       return i;
     }
   }
