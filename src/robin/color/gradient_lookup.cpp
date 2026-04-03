@@ -1,8 +1,12 @@
 #include "color/color.h"
 #include "color/gradient_lookup.h"
 #include "color/gradient_point.h"
+#include "constants.h"
 
 #include <algorithm>
+#include <cstdint>
+#include <iterator>
+#include <vector>
 
 using namespace ff;
 

@@ -1,9 +1,11 @@
 #include "color/accumulation.h"
 #include "color/color.h"
 #include "color/gradient_point.h"
+#include "color/pixel_accumulation.h"
 #include "constants.h"
 
 #include <utility>
+#include <vector>
 
 using namespace ff;
 
