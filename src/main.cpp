@@ -59,12 +59,17 @@ int main(int argc, char** argv) {
 
 	std::cout << "starting\n";
 
-	int cumulative_iterations{};
-	while (cumulative_iterations < constants::kIterations && renderer.PollEvents()) {
+	int frame{};
+	while (renderer.PollEvents()) {
 		Iterate(flame, cdf, buffer, generator, distribution, constants::kIterationsPerUpdate);
-		renderer.Update(buffer);
+		
+		if (frame % 10 == 0) {
+			renderer.Update(buffer);
+		}
 
-		cumulative_iterations += constants::kIterationsPerUpdate;
+		++frame;
+
+		renderer.Update(buffer);
 	}
 
 	std::cout << "done\n";

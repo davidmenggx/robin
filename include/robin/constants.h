@@ -9,8 +9,8 @@ namespace constants {
 	inline constexpr render::Color kBackground{ 0, 0, 0 };
 
 	// TODO: replace this with some default command line arg
-	inline constexpr int kIterations{ 10'000'000 };
-	inline constexpr int kIterationsPerUpdate{ 10'000 };
+	inline constexpr long long kIterationsPerUpdate{ 50'000ll };
+	inline constexpr int kFramesPerUpdate{ 10 };
 
 	// rendering settings:
 	inline constexpr float kPixelsPerUnit{ 750.0f };
