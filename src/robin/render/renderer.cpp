@@ -4,11 +4,14 @@
 #include "render/renderer.h"
 #include "render/tonemap.h"
 
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 
 using namespace ff;
 
@@ -66,4 +69,11 @@ void Renderer::Update(Accumulation& buffer) {
     SDL_RenderClear(renderer_);
     SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
     SDL_RenderPresent(renderer_);
+}
+
+void Renderer::UpdateStats(int points_per_second, int cumulative_iterations) {
+    SDL_SetWindowTitle(window_, 
+        std::format("Fractal Flame | {}K pts/sec | {} total pts",
+        points_per_second / 1'000,
+        cumulative_iterations).c_str());
 }

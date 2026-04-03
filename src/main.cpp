@@ -7,12 +7,11 @@
 #include "generation/variation.h"
 #include "render/renderer.h"
 
+#include <chrono>
 #include <iostream>
 #include <random>
+#include <ratio>
 #include <vector>
-
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
 
 using namespace ff;
 
@@ -60,16 +59,34 @@ int main(int argc, char** argv) {
 	std::cout << "starting\n";
 
 	int frame{};
+	int cumulative_points{};
+	auto last_stat_update = std::chrono::steady_clock::now();
+	int points_since_last_update{};
+
 	while (renderer.PollEvents()) {
+		auto t1 = std::chrono::steady_clock::now();
+
 		Iterate(flame, cdf, buffer, generator, distribution, constants::kIterationsPerUpdate);
 		
 		if (frame % 10 == 0) {
 			renderer.Update(buffer);
 		}
-
 		++frame;
 
-		renderer.Update(buffer);
+		cumulative_points += constants::kIterationsPerUpdate;
+		points_since_last_update += constants::kIterationsPerUpdate;
+
+		auto now = std::chrono::steady_clock::now();
+		double seconds_elapsed{ std::chrono::duration<double>(now - last_stat_update).count() };
+
+		if (seconds_elapsed >= 0.5) {
+			double points_per_second{ points_since_last_update / seconds_elapsed };
+
+			renderer.UpdateStats(points_per_second, cumulative_points);
+
+			points_since_last_update = 0;
+			last_stat_update = now;
+		}
 	}
 
 	std::cout << "done\n";

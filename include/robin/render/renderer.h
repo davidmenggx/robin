@@ -4,7 +4,8 @@
 
 #include <string>
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 
 namespace ff {
 	class Renderer {
@@ -16,6 +17,7 @@ namespace ff {
 		bool PollEvents();
 
 		void Update(Accumulation& buffer);
+		void UpdateStats(int points_per_second, int cumulative_iterations);
 
 	private:
 		SDL_Window* window_{};
