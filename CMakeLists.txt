@@ -8,6 +8,7 @@ endif()
 project ("robin")
 
 find_package(SDL3 CONFIG REQUIRED)
+find_package(SDL3_ttf CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -23,10 +24,10 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
 
 add_executable(robin ${SOURCES} ${HEADERS})
 
-target_link_libraries(robin PRIVATE SDL3::SDL3)
+target_link_libraries(robin PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
 
 target_include_directories(robin PRIVATE include/robin)
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-	set_property(TARGET robin PROPERTY CXX_STANDARD 20)
-endif()
+set_property(TARGET robin PROPERTY CXX_STANDARD 20)
+
+add_definitions(-DPROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")

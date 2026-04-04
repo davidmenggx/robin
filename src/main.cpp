@@ -54,39 +54,31 @@ int main(int argc, char** argv) {
 	std::mt19937 generator(device());
 	std::uniform_real_distribution<float> distribution{ 0, 1 };
 
-	Renderer renderer{ "robin" };
+	// TODO: make this a commnad line arg
+	Renderer renderer{ "robin", true };
 
 	std::cout << "starting\n";
 
 	int frame{};
-	int cumulative_points{};
-	auto last_stat_update = std::chrono::steady_clock::now();
-	int points_since_last_update{};
-
+	int total_points{};
 	while (renderer.PollEvents()) {
 		auto t1 = std::chrono::steady_clock::now();
 
-		Iterate(flame, cdf, buffer, generator, distribution, constants::kIterationsPerUpdate);
+		Iterate(flame, cdf, buffer, generator, distribution, 
+			constants::kIterationsPerUpdate);
+		total_points += constants::kIterationsPerUpdate;
 		
+		auto t2 = std::chrono::steady_clock::now();
+		float ms{ static_cast<float>(std::chrono::duration<double, std::milli>(t2 - t1).count()) };
+		float points_per_second{ static_cast<float>(constants::kIterationsPerUpdate / (ms / 1000.0)) };
+
+		renderer.UpdateTelemetry(total_points, points_per_second);
+		renderer.Update(buffer);
+
 		if (frame % 10 == 0) {
 			renderer.Update(buffer);
 		}
 		++frame;
-
-		cumulative_points += constants::kIterationsPerUpdate;
-		points_since_last_update += constants::kIterationsPerUpdate;
-
-		auto now = std::chrono::steady_clock::now();
-		double seconds_elapsed{ std::chrono::duration<double>(now - last_stat_update).count() };
-
-		if (seconds_elapsed >= 0.5) {
-			double points_per_second{ points_since_last_update / seconds_elapsed };
-
-			renderer.UpdateStats(points_per_second, cumulative_points);
-
-			points_since_last_update = 0;
-			last_stat_update = now;
-		}
 	}
 
 	std::cout << "done\n";
