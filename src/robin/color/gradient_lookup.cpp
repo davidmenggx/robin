@@ -52,7 +52,7 @@ GradientLookup::GradientLookup(std::vector<GradientPoint>& gradient_points) {
 	}
 }
 
-Color GradientLookup::Sample(float color) {
+Color GradientLookup::sample(float color) {
 	int index{ static_cast<int>(color * (constants::kGradientLookupSize - 1)) };
 	index = std::clamp(index, 0, constants::kGradientLookupSize - 1);
 	return lookup_table_[index];

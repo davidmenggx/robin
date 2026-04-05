@@ -8,7 +8,6 @@
 #include "render/renderer.h"
 
 #include <chrono>
-#include <iostream>
 #include <random>
 #include <ratio>
 #include <vector>
@@ -17,7 +16,6 @@ using namespace ff;
 
 int main(int argc, char** argv) {
 	// some hard coded transformations for initial testing
-	// a cooler transformation
 	Transformation t1{ { 0.75f,  0.15f, 0.00f,
 						 -0.15f,  0.75f, 0.00f},
 						 1.0f,
@@ -46,7 +44,7 @@ int main(int argc, char** argv) {
 
 	Flame flame{ test_transformations };
 
-	std::vector<float> cdf{ GenerateCDF(test_transformations) };
+	std::vector<float> cdf{ generateCDF(test_transformations) };
 
 	Accumulation buffer{};
 
@@ -57,31 +55,26 @@ int main(int argc, char** argv) {
 	// TODO: make this a commnad line arg
 	Renderer renderer{ "robin", true };
 
-	std::cout << "starting\n";
-
 	int frame{};
 	int total_points{};
-	while (renderer.PollEvents()) {
+	while (renderer.pollEvents()) {
 		auto t1 = std::chrono::steady_clock::now();
 
-		Iterate(flame, cdf, buffer, generator, distribution, 
-			constants::kIterationsPerUpdate);
+		iterate(flame, cdf, buffer, generator, distribution, constants::kIterationsPerUpdate);
 		total_points += constants::kIterationsPerUpdate;
 		
 		auto t2 = std::chrono::steady_clock::now();
 		float ms{ static_cast<float>(std::chrono::duration<double, std::milli>(t2 - t1).count()) };
 		float points_per_second{ static_cast<float>(constants::kIterationsPerUpdate / (ms / 1000.0)) };
 
-		renderer.UpdateTelemetry(total_points, points_per_second);
-		renderer.Update(buffer);
+		renderer.updateTelemetry(total_points, points_per_second);
+		renderer.update(buffer);
 
 		if (frame % 10 == 0) {
-			renderer.Update(buffer);
+			renderer.update(buffer);
 		}
 		++frame;
 	}
-
-	std::cout << "done\n";
 
 	return 0;
 }

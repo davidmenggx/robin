@@ -6,21 +6,20 @@
 
 using namespace ff;
 
-std::vector<float> ff::GenerateCDF(
-	const std::vector<Transformation>& transforms) {
+std::vector<float> ff::generateCDF(const std::vector<Transformation>& transforms) {
 	// compute total weight to normalize the proportion that each transform is
 	// chosen later
-	double total{};
-	for (const Transformation& t : transforms) {
-		total += t.weight_;
+	float total{};
+	for (const Transformation& transform : transforms) {
+		total += transform.weight_;
 	}
 
 	std::vector<float> cdf{};
 	cdf.reserve(std::size(transforms));
 	float cumulative{};
-	for (const Transformation& t : transforms) {
+	for (const Transformation& transform : transforms) {
 		// remember to normalize the weights
-		cumulative += t.weight_ / total;
+		cumulative += transform.weight_ / total;
 		cdf.push_back(cumulative);
 	}
 
@@ -30,7 +29,7 @@ std::vector<float> ff::GenerateCDF(
 	return cdf;
 }
 
-std::size_t ff::DrawCDF(const std::vector<float> cdf, float random) {
+std::size_t ff::drawCDF(const std::vector<float>& cdf, float random) {
 	// Rn this is a naive linear search, improve to better search algorithm
 	for (std::size_t i{ 0 }; i < std::size(cdf); ++i) {
 		if (random <= cdf[i]) {

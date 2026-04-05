@@ -16,13 +16,13 @@ namespace ff {
 		~Renderer();
 
 		// returns false if the user closes the application
-		bool PollEvents();
+		bool pollEvents();
 
-		void Update(Accumulation& buffer);
-		void UpdateTelemetry(int total_points, int current_points_per_second);
+		void update(Accumulation& buffer);
+		void updateTelemetry(int total_points, int current_points_per_second);
 
 	private:
-		void DisplayTelemetry(int total_points, int current_points_per_second);
+		void displayTelemetry(int total_points, int current_points_per_second);
 
 		SDL_Window* window_{};
 		SDL_Renderer* renderer_{};
@@ -37,6 +37,6 @@ namespace ff {
 		enum class TextAlignment { kLeft, kMiddle, kRight };
 		TTF_Font* font_{};
 
-		void DrawText(const std::string& text, float x, float y, TextAlignment align);
+		void drawText(const std::string& text, float x, float y, TextAlignment align);
 	};
 }

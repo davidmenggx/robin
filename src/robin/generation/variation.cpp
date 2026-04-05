@@ -5,11 +5,9 @@
 
 using namespace ff;
 
-void ff::ApplyVariation(
-	VariationType type, float x_in, float y_in,
-	float radius, float theta, float phi,
-	float& x_out, float& y_out
-) {
+void ff::applyVariation(
+	VariationType type, float x_in, float y_in, float& x_out, float& y_out,
+	float radius, float theta, float phi) {
 	float radius_squared = radius * radius;
 	// TODO: maybe think of a better way to do this long term
 	switch (type) {

@@ -10,7 +10,7 @@
 
 using namespace ff;
 
-uint8_t ff::RenderToRgb(float channel, float normalized_log_frequency) {
+uint8_t ff::renderToRgb(float channel, float normalized_log_frequency) {
 	// exposure scaling
 	float output{ channel * normalized_log_frequency };
 
@@ -21,12 +21,12 @@ uint8_t ff::RenderToRgb(float channel, float normalized_log_frequency) {
 	return static_cast<uint8_t>(std::clamp(output * 255.0, 0.0, 255.0));
 }
 
-std::vector<Color> ff::GenerateTonemap(Accumulation& buffer) {
+std::vector<Color> ff::generateTonemap(Accumulation& buffer) {
 	constexpr int image_size{ constants::kWidth * constants::kHeight };
 
 	std::vector<Color> output(image_size, { 0, 0, 0 });
 
-	int max_frequency{ buffer.GetMaxFrequency() };
+	int max_frequency{ buffer.getMaxFrequency() };
 	// empty image
 	if (max_frequency == 0) {
 		return output;
@@ -34,7 +34,7 @@ std::vector<Color> ff::GenerateTonemap(Accumulation& buffer) {
 
 	for (int y{ 0 }; y < constants::kHeight; ++y) {
 		for (int x{ 0 }; x < constants::kWidth; ++x) {
-			PixelAccumulation& pixel{ buffer.Get(x, y) };
+			PixelAccumulation& pixel{ buffer.get(x, y) };
 			if (pixel.frequency_ == 0) {
 				continue;
 			}
@@ -46,9 +46,9 @@ std::vector<Color> ff::GenerateTonemap(Accumulation& buffer) {
 						/ std::log(max_frequency + 1.0f)) };
 
 			output[output_idx] = {
-				RenderToRgb(pixel.red_, normalized_log_frequency),
-				RenderToRgb(pixel.green_, normalized_log_frequency),
-				RenderToRgb(pixel.blue_, normalized_log_frequency)
+				renderToRgb(pixel.red_, normalized_log_frequency),
+				renderToRgb(pixel.green_, normalized_log_frequency),
+				renderToRgb(pixel.blue_, normalized_log_frequency)
 			};
 		}
 	}

@@ -10,6 +10,6 @@ namespace ff {
         int head_{};
         float max_points_per_second_{ 1.0f };
 
-        void Push(float points_per_second);
+        void push(float points_per_second);
     };
 }

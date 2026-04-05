@@ -8,7 +8,6 @@ namespace ff {
 		kSwirl,
 		kHorseshoe,
 		// TODO: add more
-		kTotalVariations
 	};
 
 	struct Variation {
@@ -16,6 +15,6 @@ namespace ff {
 		float weight_{}; // how much this given variation contributes to the final output point
 	};
 
-	void ApplyVariation(VariationType type, float x_in, float y_in, float r,
-		float theta, float phi, float& x_out, float& y_out);
+	void applyVariation(VariationType type, float x_in, float y_in, float& x_out, float& y_out,
+		float radius = 0, float theta = 0, float phi = 0);
 }

@@ -15,11 +15,11 @@ Accumulation::Accumulation(std::vector<GradientPoint>& gradient_points)
 	, gradient_lookup_(gradient_points) {
 }
 
-[[nodiscard]] PixelAccumulation& Accumulation::Get(int x, int y) {
+[[nodiscard]] PixelAccumulation& Accumulation::get(int x, int y) {
 	return histogram_[y * constants::kWidth + x];
 }
 
-[[nodiscard]] int Accumulation::GetMaxFrequency() const {
+[[nodiscard]] int Accumulation::getMaxFrequency() const {
 	int max_frequency{};
 	for (const auto& pixel : histogram_) {
 		max_frequency = std::max(max_frequency, pixel.frequency_);
@@ -27,21 +27,21 @@ Accumulation::Accumulation(std::vector<GradientPoint>& gradient_points)
 	return max_frequency;
 }
 
-std::pair<int, int> Accumulation::ToPixels(float x, float y) {
+std::pair<int, int> Accumulation::toPixels(float x, float y) {
 	return {
 	  static_cast<int>(x * constants::kPixelsPerUnit + (constants::kWidth / 2.0f)),
 	  static_cast<int>(y * constants::kPixelsPerUnit + (constants::kHeight / 2.0f))
 	};
 }
 
-void Accumulation::Accumulate(float x, float y, float color) {
-	auto [x_proj, y_proj] = ToPixels(x, y);
+void Accumulation::accumulate(float x, float y, float color) {
+	auto [x_proj, y_proj] = toPixels(x, y);
 	if (x_proj >= 0 && x_proj < constants::kWidth
 		&& y_proj >= 0 && y_proj < constants::kHeight) {
 
-		PixelAccumulation& pixel = Get(x_proj, y_proj);
+		PixelAccumulation& pixel = get(x_proj, y_proj);
 
-		Color sample = gradient_lookup_.Sample(color);
+		Color sample = gradient_lookup_.sample(color);
 
 		float sample_red{ sample.red_ / 255.0f };
 		float sample_green{ sample.green_ / 255.0f };

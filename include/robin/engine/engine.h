@@ -10,17 +10,17 @@
 #include <vector>
 
 namespace ff {
-	void Iterate(const Flame& flame,
+	void iterate(const Flame& flame,
 		const std::vector<float>& cdf,
 		Accumulation& buffer,
 		std::mt19937& generator,
 		std::uniform_real_distribution<float>& distribution,
 		int iterations);
 
-	void ApplyVariations(const std::vector<Variation>& variations,
+	void applyVariations(const std::vector<Variation>& variations,
 		float x_in, float y_in, float& x_out, float& y_out);
 
-	const Transformation& ChooseTransformation(
+	const Transformation& chooseTransformation(
 		const std::vector<float>& cdf,
 		std::mt19937& generator,
 		std::uniform_real_distribution<float>& distribution,

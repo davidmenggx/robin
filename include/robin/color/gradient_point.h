@@ -11,7 +11,6 @@ namespace ff {
 	};
 
 	// TEMPORARY GRADIENT POINTS, MOVE SOMEWHERE ELSE!!!!:
-	// cooler colorscheme
 	inline std::vector<GradientPoint> kGradientPoints = {
 		{0.0f,   0,  15,  30},
 		{0.35f, 10,  80, 160},

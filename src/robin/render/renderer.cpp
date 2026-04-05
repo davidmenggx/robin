@@ -71,7 +71,7 @@ Renderer::~Renderer() {
 }
 
 // returns false if the user closes the application
-bool Renderer::PollEvents() {
+bool Renderer::pollEvents() {
 	SDL_Event event{};
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT) {
@@ -87,8 +87,8 @@ bool Renderer::PollEvents() {
 	return true;
 }
 
-void Renderer::Update(Accumulation& buffer) {
-	std::vector<Color> colors{ GenerateTonemap(buffer) };
+void Renderer::update(Accumulation& buffer) {
+	std::vector<Color> colors{ generateTonemap(buffer) };
 
 	SDL_UpdateTexture(texture_, nullptr, colors.data(), constants::kWidth * sizeof(Color));
 	SDL_RenderClear(renderer_);
@@ -96,12 +96,12 @@ void Renderer::Update(Accumulation& buffer) {
 	SDL_RenderPresent(renderer_);
 }
 
-void Renderer::UpdateTelemetry(int total_points, int current_points_per_second) {
-	hud_.Push(current_points_per_second);
-	DisplayTelemetry(total_points, current_points_per_second);
+void Renderer::updateTelemetry(int total_points, int current_points_per_second) {
+	hud_.push(current_points_per_second);
+	displayTelemetry(total_points, current_points_per_second);
 }
 
-void Renderer::DrawText(const std::string& text, float x, float y, TextAlignment align) {
+void Renderer::drawText(const std::string& text, float x, float y, TextAlignment align) {
 	SDL_Color white = { 210, 210, 210, 255 };
 	SDL_Surface* surf{ TTF_RenderText_Blended(font_, text.c_str(), 0, white) };
 	SDL_Texture* tex{ SDL_CreateTextureFromSurface(telemetry_renderer_, surf) };
@@ -125,7 +125,7 @@ void Renderer::DrawText(const std::string& text, float x, float y, TextAlignment
 	SDL_DestroySurface(surf);
 }
 
-void Renderer::DisplayTelemetry(int total_points, int current_points_per_second) {
+void Renderer::displayTelemetry(int total_points, int current_points_per_second) {
 	if (!show_telemetry_) {
 		return;
 	}
@@ -167,7 +167,7 @@ void Renderer::DisplayTelemetry(int total_points, int current_points_per_second)
 
 		// label
 		std::string label{ std::format("{:.1f}M", points_per_second) };
-		DrawText(label, plot_x - 6, pixel_y, TextAlignment::kRight);
+		drawText(label, plot_x - 6, pixel_y, TextAlignment::kRight);
 	}
 
 	SDL_SetRenderDrawColor(telemetry_renderer_, 80, 200, 120, 255);
@@ -193,10 +193,10 @@ void Renderer::DisplayTelemetry(int total_points, int current_points_per_second)
 	}
 
 	// summary stats
-	DrawText(
+	drawText(
 		std::format("points drawn/sec    {:.3f}M", static_cast<float>(current_points_per_second) / 1e6),
 		constants::kTelemetryWidth / 2, 14, TextAlignment::kMiddle);
-	DrawText(
+	drawText(
 		std::format("total points drawn    {:.1f}M", static_cast<float>(total_points) / 1e6),
 		constants::kTelemetryWidth / 2, 32, TextAlignment::kMiddle);
 

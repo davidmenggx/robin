@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace ff {
-	uint8_t RenderToRgb(float channel, float normalized_log_density);
+	uint8_t renderToRgb(float channel, float normalized_log_density);
 
-	std::vector<Color> GenerateTonemap(Accumulation& buffer);
+	std::vector<Color> generateTonemap(Accumulation& buffer);
 }

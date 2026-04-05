@@ -14,7 +14,7 @@ namespace ff {
 
 		GradientLookup(std::vector<GradientPoint>& gradient_points);
 
-		Color Sample(float color);
+		Color sample(float color);
 
 	private:
 		std::array<Color, constants::kGradientLookupSize> lookup_table_{};
