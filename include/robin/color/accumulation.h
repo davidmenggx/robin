@@ -3,6 +3,7 @@
 #include "color/gradient_lookup.h"
 #include "color/gradient_point.h"
 #include "color/pixel_accumulation.h"
+#include "config.h"
 
 #include <utility>
 #include <vector>
@@ -10,7 +11,8 @@
 namespace ff {
 	class Accumulation {
 	public:
-		explicit Accumulation(std::vector<GradientPoint>& gradient_points = kGradientPoints);
+		explicit Accumulation(const Config& config, 
+			std::vector<GradientPoint>& gradient_points = kGradientPoints);
 
 		[[nodiscard]] PixelAccumulation& get(int x, int y);
 
@@ -19,6 +21,8 @@ namespace ff {
 		void accumulate(float x, float y, float color);
 
 	private:
+		const Config& config_;
+
 		std::vector<PixelAccumulation> histogram_{};
 
 		GradientLookup gradient_lookup_;

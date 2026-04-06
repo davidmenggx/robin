@@ -9,6 +9,7 @@ project ("robin")
 
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_ttf CONFIG REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,7 +25,7 @@ file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
 
 add_executable(robin ${SOURCES} ${HEADERS})
 
-target_link_libraries(robin PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf)
+target_link_libraries(robin PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf CLI11::CLI11)
 
 target_include_directories(robin PRIVATE include/robin)
 

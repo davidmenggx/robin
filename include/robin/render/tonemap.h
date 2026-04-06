@@ -9,5 +9,5 @@
 namespace ff {
 	uint8_t renderToRgb(float channel, float normalized_log_density);
 
-	std::vector<Color> generateTonemap(Accumulation& buffer);
+	std::vector<Color> generateTonemap(Accumulation& buffer, int width, int height);
 }

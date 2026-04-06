@@ -19,6 +19,7 @@ const Transformation& ff::chooseTransformation(
 
 	float random{ distribution(generator) };
 	std::size_t transformation_idx{ drawCDF(cdf, random) };
+
 	return flame.transformations_[transformation_idx];
 }
 

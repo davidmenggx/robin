@@ -1,5 +1,6 @@
 #include "color/accumulation.h"
 #include "color/color.h"
+#include "config.h"
 #include "constants.h"
 #include "render/renderer.h"
 #include "render/tonemap.h"
@@ -16,28 +17,35 @@
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_stdinc.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
 using namespace ff;
 
-Renderer::Renderer(const std::string& title, bool show_telemetry) 
-	: show_telemetry_{ show_telemetry }
+Renderer::Renderer(const std::string& title, const Config& config)
+	: config_{ config }
 {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
 		throw std::runtime_error(std::string("SDL initialization error: ") + SDL_GetError());
 	}
 
+	// SDL flag type
+	Uint32 window_flags{ 0 };
+	if (config.fullscreen_) {
+		window_flags |= SDL_WINDOW_FULLSCREEN;
+	}
+
 	if (!SDL_CreateWindowAndRenderer(
-		title.c_str(), constants::kWidth, constants::kHeight,
-		0, &window_, &renderer_)) {
+		title.c_str(), config.gui_width_, config.gui_height_,
+		window_flags, &window_, &renderer_)) {
 		SDL_Quit();
 		throw std::runtime_error(std::string("Window/Renderer creation failed: ") + SDL_GetError());
 	}
 
 	texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32,
-		SDL_TEXTUREACCESS_STREAMING, constants::kWidth, constants::kHeight);
+		SDL_TEXTUREACCESS_STREAMING, config.gui_width_, config.gui_height_);
 
 	if (!texture_) {
 		SDL_DestroyRenderer(renderer_);
@@ -46,7 +54,7 @@ Renderer::Renderer(const std::string& title, bool show_telemetry)
 		throw std::runtime_error(std::string("Texture creation failed: ") + SDL_GetError());
 	}
 
-	if (show_telemetry_) {
+	if (config.show_telemetry_) {
 		telemetry_window_ = SDL_CreateWindow("robin runtime telemetry", 
 			constants::kTelemetryWidth, constants::kTelemetryHeight, 0);
 		telemetry_renderer_ = SDL_CreateRenderer(telemetry_window_, nullptr);
@@ -88,9 +96,9 @@ bool Renderer::pollEvents() {
 }
 
 void Renderer::update(Accumulation& buffer) {
-	std::vector<Color> colors{ generateTonemap(buffer) };
+	std::vector<Color> colors{ generateTonemap(buffer, config_.gui_width_, config_.gui_height_) };
 
-	SDL_UpdateTexture(texture_, nullptr, colors.data(), constants::kWidth * sizeof(Color));
+	SDL_UpdateTexture(texture_, nullptr, colors.data(), config_.gui_width_ * sizeof(Color));
 	SDL_RenderClear(renderer_);
 	SDL_RenderTexture(renderer_, texture_, nullptr, nullptr);
 	SDL_RenderPresent(renderer_);
@@ -126,7 +134,7 @@ void Renderer::drawText(const std::string& text, float x, float y, TextAlignment
 }
 
 void Renderer::displayTelemetry(int total_points, int current_points_per_second) {
-	if (!show_telemetry_) {
+	if (!config_.show_telemetry_) {
 		return;
 	}
 

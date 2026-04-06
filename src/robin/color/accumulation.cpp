@@ -2,6 +2,7 @@
 #include "color/color.h"
 #include "color/gradient_point.h"
 #include "color/pixel_accumulation.h"
+#include "config.h"
 #include "constants.h"
 
 #include <algorithm>
@@ -10,13 +11,16 @@
 
 using namespace ff;
 
-Accumulation::Accumulation(std::vector<GradientPoint>& gradient_points)
-	: histogram_(constants::kWidth* constants::kHeight)
-	, gradient_lookup_(gradient_points) {
+Accumulation::Accumulation(const Config& config, 
+	std::vector<GradientPoint>& gradient_points)
+	: config_{ config }
+	, gradient_lookup_(gradient_points)
+	, histogram_(config.gui_width_ * config.gui_height_)
+{
 }
 
 [[nodiscard]] PixelAccumulation& Accumulation::get(int x, int y) {
-	return histogram_[y * constants::kWidth + x];
+	return histogram_[y * config_.gui_width_ + x];
 }
 
 [[nodiscard]] int Accumulation::getMaxFrequency() const {
@@ -29,15 +33,15 @@ Accumulation::Accumulation(std::vector<GradientPoint>& gradient_points)
 
 std::pair<int, int> Accumulation::toPixels(float x, float y) {
 	return {
-	  static_cast<int>(x * constants::kPixelsPerUnit + (constants::kWidth / 2.0f)),
-	  static_cast<int>(y * constants::kPixelsPerUnit + (constants::kHeight / 2.0f))
+	  static_cast<int>(x * constants::kPixelsPerUnit + (config_.gui_width_ / 2.0f)),
+	  static_cast<int>(y * constants::kPixelsPerUnit + (config_.gui_height_ / 2.0f))
 	};
 }
 
 void Accumulation::accumulate(float x, float y, float color) {
 	auto [x_proj, y_proj] = toPixels(x, y);
-	if (x_proj >= 0 && x_proj < constants::kWidth
-		&& y_proj >= 0 && y_proj < constants::kHeight) {
+	if (x_proj >= 0 && x_proj < config_.gui_width_
+		&& y_proj >= 0 && y_proj < config_.gui_height_) {
 
 		PixelAccumulation& pixel = get(x_proj, y_proj);
 

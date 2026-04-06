@@ -1,6 +1,7 @@
 #pragma once
 
 #include "color/accumulation.h"
+#include "config.h"
 #include "render/telemetry_hud.h"
 
 #include <string>
@@ -12,7 +13,7 @@
 namespace ff {
 	class Renderer {
 	public:
-		Renderer(const std::string& title, bool show_telemetry);
+		Renderer(const std::string& title, const Config& config);
 		~Renderer();
 
 		// returns false if the user closes the application
@@ -24,13 +25,14 @@ namespace ff {
 	private:
 		void displayTelemetry(int total_points, int current_points_per_second);
 
+		const Config& config_;
+
 		SDL_Window* window_{};
 		SDL_Renderer* renderer_{};
 		SDL_Texture* texture_{};
 
 		SDL_Window* telemetry_window_{};
 		SDL_Renderer* telemetry_renderer_{};
-		bool show_telemetry_{};
 
 		TelemetryHUD hud_{};
 
