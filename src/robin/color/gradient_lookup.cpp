@@ -10,7 +10,7 @@
 
 using namespace ff;
 
-GradientLookup::GradientLookup(std::vector<GradientPoint>& gradient_points) {
+GradientLookup::GradientLookup(const std::vector<GradientPoint>& gradient_points) {
 	for (int i{ 0 }; i < constants::kGradientLookupSize; ++i) {
 		float transition_position{ static_cast<float>(i) / (constants::kGradientLookupSize - 1) };
 

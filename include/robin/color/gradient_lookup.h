@@ -12,7 +12,7 @@ namespace ff {
 	public:
 		GradientLookup() = delete;
 
-		GradientLookup(std::vector<GradientPoint>& gradient_points);
+		GradientLookup(const std::vector<GradientPoint>& gradient_points);
 
 		Color sample(float color);
 

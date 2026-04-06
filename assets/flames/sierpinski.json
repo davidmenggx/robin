@@ -1,0 +1,85 @@
+{
+  "name": "sierpinski triangle",
+  "gradient": [
+    {
+      "pos": 0.0,
+      "r": 10,
+      "g": 0,
+      "b": 40
+    },
+    {
+      "pos": 0.3,
+      "r": 180,
+      "g": 0,
+      "b": 220
+    },
+    {
+      "pos": 0.6,
+      "r": 255,
+      "g": 100,
+      "b": 0
+    },
+    {
+      "pos": 1.0,
+      "r": 255,
+      "g": 255,
+      "b": 200
+    }
+  ],
+  "transformations": [
+    {
+      "weight": 1.0,
+      "color": 0.0,
+      "affine": {
+        "a": 0.5,
+        "b": 0.0,
+        "c": 0.0,
+        "d": 0.0,
+        "e": 0.5,
+        "f": 0.0
+      },
+      "variations": [
+        {
+          "type": "linear",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "weight": 1.0,
+      "color": 0.5,
+      "affine": {
+        "a": 0.5,
+        "b": 0.0,
+        "c": 0.5,
+        "d": 0.0,
+        "e": 0.5,
+        "f": 0.0
+      },
+      "variations": [
+        {
+          "type": "linear",
+          "weight": 1.0
+        }
+      ]
+    },
+    {
+      "weight": 1.0,
+      "color": 1.0,
+      "affine": {
+        "a": 0.5,
+        "b": 0.0,
+        "c": 0.25,
+        "d": 0.0,
+        "e": 0.5,
+        "f": 0.5
+      },
+      "variations": [
+        {
+          "type": "linear",
+          "weight": 1.0
+        }
+      ]
+    }
+  ]
+}

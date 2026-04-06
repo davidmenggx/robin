@@ -1,71 +1,15 @@
-#include "robin/color/accumulation.h"
 #include "robin/config.h"
-#include "robin/constants.h"
-#include "robin/engine/cdf.h"
 #include "robin/engine/engine.h"
-#include "robin/generation/flame.h"
 #include "robin/generation/transformation.h"
-#include "robin/render/frame_events.h"
-#include "robin/render/renderer.h"
-#include "robin/render/tonemap.h"
-#include "robin/utils/save_image.h"
+#include "robin/generation/variation.h"
+#include "robin/utils/parse_settings.h"
 
-#include <chrono>
-#include <random>
-#include <ratio>
+#include <exception>
 #include <vector>
 
-#include <CLI/CLI.hpp>
+#include <CLI/App.hpp>
 
 using namespace ff;
-
-void runEngine(std::vector<Transformation>& transformations, const Config& config) {
-	Flame flame{ transformations };
-
-	std::vector<float> cdf{ generateCDF(transformations) };
-
-	Accumulation buffer{ config };
-
-	std::random_device device{};
-	std::mt19937 generator(device());
-	std::uniform_real_distribution<float> distribution{ 0, 1 };
-
-	Renderer renderer{ "robin", config };
-
-	int frame{};
-	int total_points{};
-	for (;;) {
-		FrameEvents events{ renderer.pollEvents() };
-
-		if (events.quit_) {
-			break;
-		}
-		if (events.save_) {
-			bool success{ utils::saveImage(generateTonemap(buffer, config.gui_width_, 
-				config.gui_height_), config) };
-			if (!success) {
-				// TODO: Add some logging here
-			}
-		}
-
-		auto t1 = std::chrono::steady_clock::now();
-
-		iterate(flame, cdf, buffer, generator, distribution, config.iterations_);
-		total_points += config.iterations_;
-
-		auto t2 = std::chrono::steady_clock::now();
-		float ms{ static_cast<float>(std::chrono::duration<float, std::milli>(t2 - t1).count()) };
-		float points_per_second{ static_cast<float>(config.iterations_ / (ms / 1000.0)) };
-
-		renderer.updateTelemetry(total_points, points_per_second);
-		renderer.update(buffer);
-
-		if (frame % 10 == 0) {
-			renderer.update(buffer);
-		}
-		++frame;
-	}
-}
 
 int main(int argc, char** argv) {
 	CLI::App app{"High-performance fractal flame renderer", "robin"};
@@ -77,12 +21,14 @@ int main(int argc, char** argv) {
 
 	app.add_option("--width", config.gui_width_, "Renderer width");
 	app.add_option("--height", config.gui_height_, "Renderer height");
-	app.add_option("-i,--iterations-per-update", config.iterations_, "Number of iterations per render update");
+	app.add_option("-u,--iterations-per-update", config.iterations_, "Number of iterations per render update");
 	
-	app.add_option("-o,--output", config.output_name_, "Output filename for saved flame. [s] to save");
+	app.add_option("-i,--input", config.input_name_, "Input filename for transformations (.json)");
+	app.add_option("-o,--output", config.output_name_, "Output filename for saved flame (.png). [s] to save");
 
 	CLI11_PARSE(app, argc, argv);
 
+	// TODO: move these guys to constants
 	// some hard coded transformations for initial testing
 	Transformation t1{ { 0.75f,  0.15f, 0.00f,
 						 -0.15f,  0.75f, 0.00f},
@@ -108,9 +54,16 @@ int main(int argc, char** argv) {
 						 1.0f,
 						 {{VariationType::kSwirl, 0.4f}, {VariationType::kLinear, 0.6f}} };
 
-	std::vector<Transformation> test_transformations{ {t1, t2, t3, t4} };
+	try {
+		utils::parseSettings(config);
+	}
+	catch (std::exception& e) {
+		// TODO: figure out a better way to handle this
+		// watch out bc runtime error can be thrown in multiple ways
+		config.transformation_ = { t1, t2, t3, t4 };
+	}
 
-	runEngine(test_transformations, config);
+	runEngine(config);
 
 	return 0;
 }

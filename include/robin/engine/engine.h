@@ -1,11 +1,11 @@
 #pragma once
 
+#include "robin/config.h"
 #include "robin/color/accumulation.h"
 #include "robin/generation/flame.h"
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
 
-#include <cstdint>
 #include <random>
 #include <vector>
 
@@ -25,4 +25,6 @@ namespace ff {
 		std::mt19937& generator,
 		std::uniform_real_distribution<float>& distribution,
 		const Flame& flame);
+
+	void runEngine(const Config& config);
 }

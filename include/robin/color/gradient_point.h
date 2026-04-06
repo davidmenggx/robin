@@ -10,6 +10,7 @@ namespace ff {
 		Color color_{};
 	};
 
+	// TODO: move to constants
 	// TEMPORARY GRADIENT POINTS, MOVE SOMEWHERE ELSE!!!!:
 	inline std::vector<GradientPoint> kGradientPoints = {
 		{0.0f,   0,  15,  30},

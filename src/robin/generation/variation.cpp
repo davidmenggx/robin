@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <string>
+#include <unordered_map>
 
 using namespace ff;
 
@@ -44,4 +46,23 @@ void ff::applyVariation(
 	default:
 		throw std::runtime_error("Unknown variation type");
 	}
+}
+
+VariationType ff::getType(const std::string& type) {
+	static const std::unordered_map<std::string, VariationType> lookup{
+		{
+			{"linear", VariationType::kLinear},
+			{"sinusoidal", VariationType::kSinusoidal},
+			{"spherical", VariationType::kSpherical},
+			{"swirl", VariationType::kSwirl},
+			{"horseshoe", VariationType::kHorseshoe},
+		}
+	};
+
+	auto it = lookup.find(type);
+	if (it != lookup.end()) {
+		return it->second;
+	}
+
+	throw std::runtime_error("Invalid variation type");
 }

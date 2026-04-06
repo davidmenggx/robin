@@ -1,12 +1,19 @@
 #include "robin/color/accumulation.h"
+#include "robin/config.h"
 #include "robin/engine/cdf.h"
 #include "robin/engine/engine.h"
 #include "robin/generation/flame.h"
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
+#include "robin/render/frame_events.h"
+#include "robin/render/renderer.h"
+#include "robin/render/tonemap.h"
+#include "robin/utils/save_image.h"
 
+#include <chrono>
 #include <cmath>
 #include <random>
+#include <ratio>
 #include <vector>
 
 using namespace ff;
@@ -90,5 +97,52 @@ void ff::iterate(const Flame& flame,
 		color = (color + transformation.color_) * 0.5f;
 
 		buffer.accumulate(x, y, color);
+	}
+}
+
+void ff::runEngine(const Config& config) {
+	Flame flame{ config.transformation_ };
+
+	std::vector<float> cdf{ generateCDF(config.transformation_) };
+
+	Accumulation buffer{ config };
+
+	std::random_device device{};
+	std::mt19937 generator(device());
+	std::uniform_real_distribution<float> distribution{ 0, 1 };
+
+	Renderer renderer{ "robin", config };
+
+	int frame{};
+	int total_points{};
+	for (;;) {
+		FrameEvents events{ renderer.pollEvents() };
+
+		if (events.quit_) {
+			break;
+		}
+		if (events.save_) {
+			if (!utils::saveImage(generateTonemap(buffer, config.gui_width_, 
+				config.gui_height_), config)) {
+				// TODO: Add some logging here
+			}
+		}
+
+		auto t1 = std::chrono::steady_clock::now();
+
+		iterate(flame, cdf, buffer, generator, distribution, config.iterations_);
+		total_points += config.iterations_;
+
+		auto t2 = std::chrono::steady_clock::now();
+		float ms{ static_cast<float>(std::chrono::duration<float, std::milli>(t2 - t1).count()) };
+		float points_per_second{ static_cast<float>(config.iterations_ / (ms / 1000.0)) };
+
+		renderer.updateTelemetry(total_points, points_per_second);
+		renderer.update(buffer);
+
+		if (frame % 10 == 0) {
+			renderer.update(buffer);
+		}
+		++frame;
 	}
 }

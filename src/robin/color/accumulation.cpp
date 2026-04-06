@@ -11,10 +11,9 @@
 
 using namespace ff;
 
-Accumulation::Accumulation(const Config& config, 
-	std::vector<GradientPoint>& gradient_points)
+Accumulation::Accumulation(const Config& config)
 	: config_{ config }
-	, gradient_lookup_(gradient_points)
+	, gradient_lookup_(config.gradient_)
 	, histogram_(config.gui_width_ * config.gui_height_)
 {
 }

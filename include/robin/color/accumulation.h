@@ -11,8 +11,7 @@
 namespace ff {
 	class Accumulation {
 	public:
-		explicit Accumulation(const Config& config, 
-			std::vector<GradientPoint>& gradient_points = kGradientPoints);
+		explicit Accumulation(const Config& config);
 
 		[[nodiscard]] PixelAccumulation& get(int x, int y);
 
