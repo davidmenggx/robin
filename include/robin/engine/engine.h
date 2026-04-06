@@ -1,9 +1,9 @@
 #pragma once
 
-#include "color/accumulation.h"
-#include "generation/flame.h"
-#include "generation/transformation.h"
-#include "generation/variation.h"
+#include "robin/color/accumulation.h"
+#include "robin/generation/flame.h"
+#include "robin/generation/transformation.h"
+#include "robin/generation/variation.h"
 
 #include <cstdint>
 #include <random>

@@ -1,11 +1,14 @@
-#include "color/accumulation.h"
-#include "config.h"
-#include "constants.h"
-#include "engine/cdf.h"
-#include "engine/engine.h"
-#include "generation/flame.h"
-#include "generation/transformation.h"
-#include "render/renderer.h"
+#include "robin/color/accumulation.h"
+#include "robin/config.h"
+#include "robin/constants.h"
+#include "robin/engine/cdf.h"
+#include "robin/engine/engine.h"
+#include "robin/generation/flame.h"
+#include "robin/generation/transformation.h"
+#include "robin/render/frame_events.h"
+#include "robin/render/renderer.h"
+#include "robin/render/tonemap.h"
+#include "robin/utils/save_image.h"
 
 #include <chrono>
 #include <random>
@@ -31,7 +34,20 @@ void runEngine(std::vector<Transformation>& transformations, const Config& confi
 
 	int frame{};
 	int total_points{};
-	while (renderer.pollEvents()) {
+	for (;;) {
+		FrameEvents events{ renderer.pollEvents() };
+
+		if (events.quit_) {
+			break;
+		}
+		if (events.save_) {
+			bool success{ utils::saveImage(generateTonemap(buffer, config.gui_width_, 
+				config.gui_height_), config) };
+			if (!success) {
+				// TODO: Add some logging here
+			}
+		}
+
 		auto t1 = std::chrono::steady_clock::now();
 
 		iterate(flame, cdf, buffer, generator, distribution, config.iterations_);
@@ -63,7 +79,7 @@ int main(int argc, char** argv) {
 	app.add_option("--height", config.gui_height_, "Renderer height");
 	app.add_option("-i,--iterations-per-update", config.iterations_, "Number of iterations per render update");
 	
-	app.add_option("-o,--output", config.output_path_, "Output filename for saved flame. [s] to save");
+	app.add_option("-o,--output", config.output_name_, "Output filename for saved flame. [s] to save");
 
 	CLI11_PARSE(app, argc, argv);
 

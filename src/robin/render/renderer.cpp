@@ -1,9 +1,10 @@
-#include "color/accumulation.h"
-#include "color/color.h"
-#include "config.h"
-#include "constants.h"
-#include "render/renderer.h"
-#include "render/tonemap.h"
+#include "robin/color/accumulation.h"
+#include "robin/color/color.h"
+#include "robin/config.h"
+#include "robin/constants.h"
+#include "robin/render/frame_events.h"
+#include "robin/render/renderer.h"
+#include "robin/render/tonemap.h"
 
 #include <format>
 #include <optional>
@@ -78,21 +79,24 @@ Renderer::~Renderer() {
 	SDL_Quit();
 }
 
-// returns false if the user closes the application
-bool Renderer::pollEvents() {
+FrameEvents Renderer::pollEvents() {
+	FrameEvents output{};
 	SDL_Event event{};
 	while (SDL_PollEvent(&event)) {
 		if (event.type == SDL_EVENT_QUIT) {
-			return false;
+			output.quit_ = true;
 		}
 		if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
-			return false;
+			output.quit_ = true;
 		}
 		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
-			return false;
+			output.quit_ = true;
+		}
+		if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_S) {
+			output.save_ = true;
 		}
 	}
-	return true;
+	return output;
 }
 
 void Renderer::update(Accumulation& buffer) {

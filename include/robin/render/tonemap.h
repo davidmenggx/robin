@@ -1,7 +1,7 @@
 #pragma once
 
-#include "color/accumulation.h"
-#include "color/color.h"
+#include "robin/color/accumulation.h"
+#include "robin/color/color.h"
 
 #include <cstdint>
 #include <vector>

@@ -1,8 +1,8 @@
-#include "color/accumulation.h"
-#include "color/color.h"
-#include "color/pixel_accumulation.h"
-#include "constants.h"
-#include "render/tonemap.h"
+#include "robin/color/accumulation.h"
+#include "robin/color/color.h"
+#include "robin/color/pixel_accumulation.h"
+#include "robin/constants.h"
+#include "robin/render/tonemap.h"
 
 #include <algorithm>
 #include <cmath>

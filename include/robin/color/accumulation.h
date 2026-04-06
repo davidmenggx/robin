@@ -1,9 +1,9 @@
 #pragma once
 
-#include "color/gradient_lookup.h"
-#include "color/gradient_point.h"
-#include "color/pixel_accumulation.h"
-#include "config.h"
+#include "robin/color/gradient_lookup.h"
+#include "robin/color/gradient_point.h"
+#include "robin/color/pixel_accumulation.h"
+#include "robin/config.h"
 
 #include <utility>
 #include <vector>

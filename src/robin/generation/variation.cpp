@@ -1,4 +1,4 @@
-#include "generation/variation.h"
+#include "robin/generation/variation.h"
 
 #include <cmath>
 #include <stdexcept>

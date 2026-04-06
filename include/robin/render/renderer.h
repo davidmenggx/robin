@@ -1,8 +1,9 @@
 #pragma once
 
-#include "color/accumulation.h"
-#include "config.h"
-#include "render/telemetry_hud.h"
+#include "robin/color/accumulation.h"
+#include "robin/config.h"
+#include "robin/render/frame_events.h"
+#include "robin/render/telemetry_hud.h"
 
 #include <string>
 
@@ -16,8 +17,7 @@ namespace ff {
 		Renderer(const std::string& title, const Config& config);
 		~Renderer();
 
-		// returns false if the user closes the application
-		bool pollEvents();
+		FrameEvents pollEvents();
 
 		void update(Accumulation& buffer);
 		void updateTelemetry(int total_points, int current_points_per_second);

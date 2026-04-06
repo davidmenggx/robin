@@ -1,12 +1,13 @@
 #pragma once
 
-#include "render/color.h"
+#include "robin/render/color.h"
 
 namespace constants {
 	// gui details
 	inline constexpr int kWidth{ 1500 };
 	inline constexpr int kHeight{ 1500 };
 	inline constexpr render::Color kBackground{ 0, 0, 0 };
+	inline constexpr int kColorChannels{ 4 };
 
 	// runtime telemetry details
 	inline constexpr int kTelemetryWidth{ 800 };

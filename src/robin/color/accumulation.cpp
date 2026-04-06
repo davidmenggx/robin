@@ -1,9 +1,9 @@
-#include "color/accumulation.h"
-#include "color/color.h"
-#include "color/gradient_point.h"
-#include "color/pixel_accumulation.h"
-#include "config.h"
-#include "constants.h"
+#include "robin/color/accumulation.h"
+#include "robin/color/color.h"
+#include "robin/color/gradient_point.h"
+#include "robin/color/pixel_accumulation.h"
+#include "robin/config.h"
+#include "robin/constants.h"
 
 #include <algorithm>
 #include <utility>

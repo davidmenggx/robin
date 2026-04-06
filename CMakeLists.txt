@@ -27,7 +27,7 @@ add_executable(robin ${SOURCES} ${HEADERS})
 
 target_link_libraries(robin PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf CLI11::CLI11)
 
-target_include_directories(robin PRIVATE include/robin)
+target_include_directories(robin PRIVATE include)
 
 set_property(TARGET robin PROPERTY CXX_STANDARD 20)
 

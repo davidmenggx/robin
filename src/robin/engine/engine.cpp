@@ -1,9 +1,9 @@
-#include "color/accumulation.h"
-#include "engine/cdf.h"
-#include "engine/engine.h"
-#include "generation/flame.h"
-#include "generation/transformation.h"
-#include "generation/variation.h"
+#include "robin/color/accumulation.h"
+#include "robin/engine/cdf.h"
+#include "robin/engine/engine.h"
+#include "robin/generation/flame.h"
+#include "robin/generation/transformation.h"
+#include "robin/generation/variation.h"
 
 #include <cmath>
 #include <random>

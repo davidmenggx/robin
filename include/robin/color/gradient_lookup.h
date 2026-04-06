@@ -1,8 +1,8 @@
 #pragma once
 
-#include "color/color.h"
-#include "color/gradient_point.h"
-#include "constants.h"
+#include "robin/color/color.h"
+#include "robin/color/gradient_point.h"
+#include "robin/constants.h"
 
 #include <array>
 #include <vector>

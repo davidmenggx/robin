@@ -1,7 +1,7 @@
 #pragma once
 
-#include "generation/affine.h"
-#include "generation/variation.h"
+#include "robin/generation/affine.h"
+#include "robin/generation/variation.h"
 
 #include <vector>
 
