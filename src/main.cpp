@@ -3,6 +3,8 @@
 #include "robin/utils/parse_flame_options.h"
 
 #include <exception>
+#include <format>
+#include <iostream>
 
 #include <CLI/CLI.hpp>
 
@@ -31,7 +33,7 @@ int main(int argc, char** argv) {
 		utils::parseSettings(config);
 	}
 	catch (std::exception& e) {
-		// TODO: error logging
+		std::cerr << std::format("Failed to load flame JSON data: {}", e.what());
 	}
 
 	runEngine(config);

@@ -10,7 +10,17 @@ enum class VariationType {
 	kSpherical,
 	kSwirl,
 	kHorseshoe,
-	// TODO: add more
+	kPolar,
+	kHandkerchief,
+	kHeart,
+	kDisc,
+	kSpiral,
+	kHyperbolic,
+	kDiamond,
+	kEx,
+	kBent,
+	kFisheye,
+	kExponential
 };
 
 /**
