@@ -4,7 +4,7 @@
 
 #include <exception>
 
-#include <CLI/App.hpp>
+#include <CLI/CLI.hpp>
 
 int main(int argc, char** argv) {
 	// parse command line inputs
