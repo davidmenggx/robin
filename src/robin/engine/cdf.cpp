@@ -4,9 +4,7 @@
 #include <iterator>
 #include <vector>
 
-using namespace ff;
-
-std::vector<float> ff::generateCDF(const std::vector<Transformation>& transforms) {
+std::vector<float> generateDistribution(const std::vector<Transformation>& transforms) {
 	// compute total weight to normalize the proportion that each transform is
 	// chosen later
 	float total{};
@@ -29,10 +27,10 @@ std::vector<float> ff::generateCDF(const std::vector<Transformation>& transforms
 	return cdf;
 }
 
-std::size_t ff::drawCDF(const std::vector<float>& cdf, float random) {
+std::size_t findIndex(const std::vector<float>& cdf, float cutoff) {
 	// Rn this is a naive linear search, improve to better search algorithm
 	for (std::size_t i{ 0 }; i < std::size(cdf); ++i) {
-		if (random <= cdf[i]) {
+		if (cutoff <= cdf[i]) {
 			return i;
 		}
 	}

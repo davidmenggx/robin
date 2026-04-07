@@ -1,3 +1,4 @@
+#include "robin/generation/point2d.h"
 #include "robin/generation/variation.h"
 
 #include <cmath>
@@ -5,50 +6,38 @@
 #include <string>
 #include <unordered_map>
 
-using namespace ff;
-
-void ff::applyVariation(
-	VariationType type, float x_in, float y_in, float& x_out, float& y_out,
+Point2D applyVariation(
+	VariationType type, 
+	float x, float y,
 	float radius, float theta, float phi) {
 	float radius_squared = radius * radius;
 	// TODO: maybe think of a better way to do this long term
 	switch (type) {
 	case VariationType::kLinear:
-		x_out = x_in;
-		y_out = y_in;
-		break;
-
+		return { x, y };
 	case VariationType::kSinusoidal:
-		x_out = std::sin(x_in);
-		y_out = std::sin(y_in);
-		break;
-
+		return { std::sin(x), std::sin(y) };
 	case VariationType::kSpherical:
-		x_out = x_in / radius_squared;
-		y_out = y_in / radius_squared;
-		break;
-
+		return { x / radius_squared, y / radius_squared };
 	case VariationType::kSwirl:
-		x_out = x_in * std::sin(radius_squared) - y_in * std::cos(radius_squared);
-		y_out = x_in * std::cos(radius_squared) - y_in * std::sin(radius_squared);
-		break;
-
+		return {
+			x * std::sin(radius_squared) - y * std::cos(radius_squared),
+			x * std::cos(radius_squared) - y * std::sin(radius_squared)
+		};
 	case VariationType::kHorseshoe:
 		if (radius == 0.0f) {
-			x_out = 0.0f;
-			y_out = 0.0f;
-			break;
+			return { 0.0f, 0.0f };
 		}
-		x_out = ((x_in - y_in) * (x_in + y_in)) / radius;
-		y_out = (2.0f * x_in * y_in) / radius;
-		break;
-
+		return {
+			((x - y) * (x + y)) / radius,
+			(2.0f * x * y) / radius
+		};
 	default:
-		throw std::runtime_error("Unknown variation type");
+		throw std::domain_error("Unknown variation type");
 	}
 }
 
-VariationType ff::getType(const std::string& type) {
+VariationType getVariationType(const std::string& type) {
 	static const std::unordered_map<std::string, VariationType> lookup{
 		{
 			{"linear", VariationType::kLinear},
@@ -64,5 +53,5 @@ VariationType ff::getType(const std::string& type) {
 		return it->second;
 	}
 
-	throw std::runtime_error("Invalid variation type");
+	throw std::domain_error("Invalid variation type");
 }

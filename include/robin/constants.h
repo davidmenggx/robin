@@ -1,26 +1,37 @@
 #pragma once
 
-#include "robin/render/color.h"
+#include "robin/color/color.h"
+#include "robin/color/gradient_stop.h"
+#include "robin/generation/transformation.h"
+#include "robin/generation/variation.h"
+
+#include <string>
+#include <vector>
 
 namespace constants {
-	// gui details
+	// gui constants
 	inline constexpr int kWidth{ 1500 };
 	inline constexpr int kHeight{ 1500 };
-	inline constexpr render::Color kBackground{ 0, 0, 0 };
+	inline constexpr Color kBackground{ 0, 0, 0, 255 };
 	inline constexpr int kColorChannels{ 4 };
 
-	// runtime telemetry details
+	// I/O constants
+	inline const std::string kInputFilename{ "input" };
+	inline const std::string kOutputFilename{ "output" };
+
+	// runtime telemetry constants
 	inline constexpr int kTelemetryWidth{ 800 };
 	inline constexpr int kTelemetryHeight{ 800 };
 	inline constexpr int kTelemetryHistorySize{ 100 }; // how many samples saved
 	inline constexpr int kTelemetryTicks{ 4 };
 
-	// TODO: replace this with some default command line arg
 	inline constexpr long long kIterationsPerUpdate{ 50'000ll };
 	inline constexpr int kFramesPerUpdate{ 10 };
 
-	// rendering settings:
+	// rendering constants:
 	inline constexpr float kPixelsPerUnit{ 750.0f };
+	// number of samples generated for gradient lookup table
+	// aka the number the distinct color outputs possible
 	inline constexpr int kGradientLookupSize{ 1024 };
 
 	inline constexpr int kTelemetryMarginLeft{ 50 };
@@ -30,4 +41,35 @@ namespace constants {
 	// prevent the line chart from maxing out at the top of the graph by
 	// making the vertical axis extend higher than the true maximum
 	inline constexpr float kTelemetryGraphUpperScaling{ 1.2f };
+
+	// Default application settings:
+	inline const std::vector<GradientStop> kDefaultGradientStops{ {
+		{0.0f,   0,  15,  30},
+		{0.35f, 10,  80, 160},
+		{0.65f, 20, 220, 200},
+		{1.0f, 220, 255, 255},
+	} };
+
+	inline const std::vector<Transformation> kDefaultTransformation{ 
+		{
+			// First transformation
+			{ 0.75f,  0.15f, 0.00f, -0.15f,  0.75f, 0.00f},
+			1.0f, 0.0f, {{VariationType::kSpherical, 0.6f}, {VariationType::kLinear, 0.4f}}
+		},
+		{
+			// Second transformation
+			{ 0.50f,  0.00f,  1.20f, 0.00f,  0.50f, -0.80f},
+			1.0f, 0.33f, {{VariationType::kSinusoidal, 0.8f}, {VariationType::kLinear, 0.2f}}
+		},
+		{
+			// Third transformation
+			{ 0.40f, -0.40f, -1.00f, 0.40f,  0.40f,  0.50f},
+			1.0f, 0.66f, {{VariationType::kHorseshoe, 0.5f}, {VariationType::kLinear, 0.5f}}
+		},
+		{
+			// Fourth transformation
+			{ 0.60f,  0.40f,  0.00f, -0.40f,  0.60f,  1.20f},
+			1.0f, 1.0f, {{VariationType::kSwirl, 0.4f}, {VariationType::kLinear, 0.6f}}
+		}
+	};
 }

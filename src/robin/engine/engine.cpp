@@ -3,6 +3,7 @@
 #include "robin/engine/cdf.h"
 #include "robin/engine/engine.h"
 #include "robin/generation/flame.h"
+#include "robin/generation/point2d.h"
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
 #include "robin/render/frame_events.h"
@@ -16,41 +17,37 @@
 #include <ratio>
 #include <vector>
 
-using namespace ff;
-
-const Transformation& ff::chooseTransformation(
+static const Transformation& chooseRandomTransformation(
 	const std::vector<float>& cdf,
 	std::mt19937& generator,
 	std::uniform_real_distribution<float>& distribution,
 	const Flame& flame) {
 
 	float random{ distribution(generator) };
-	std::size_t transformation_idx{ drawCDF(cdf, random) };
+	std::size_t transformation_idx{ findIndex(cdf, random) };
 
 	return flame.transformations_[transformation_idx];
 }
 
-void ff::applyVariations(
-	const std::vector<Variation>& variations,
-	float x_in, float y_in, float& x_out, float& y_out) {
-	float radius{ std::sqrt(x_in * x_in + y_in * y_in) };
-	float theta{ std::atan2(y_in, x_in) };
-	float phi{ std::atan2(x_in, y_in) };
+// Each Transformation object is composed of one or more variations, apply them and return the updated result
+static Point2D applyVariations(const std::vector<Variation>& variations, float x, float y) {
+	float radius{ std::sqrt(x * x + y * y) };
+	float theta{ std::atan2(y, x) };
+	float phi{ std::atan2(x, y) };
 
-	float x_accumulated{}, y_accumulated{};
+	float x_accumulated{};
+	float y_accumulated{};
 
 	for (const Variation& variation : variations) {
-		float x_var{}, y_var{};
-		applyVariation(variation.type_, x_in, y_in, x_var, y_var, radius, theta, phi);
-		x_accumulated += variation.weight_ * x_var;
-		y_accumulated += variation.weight_ * y_var;
+		Point2D updated_point{ applyVariation(variation.type_, x, y, radius, theta, phi) };
+		x_accumulated += variation.weight_ * updated_point.x_;
+		y_accumulated += variation.weight_ * updated_point.y_;
 	}
 
-	x_out = x_accumulated;
-	y_out = y_accumulated;
+	return { x_accumulated, y_accumulated };
 }
 
-void ff::iterate(const Flame& flame,
+static void runEngineIteration(const Flame& flame,
 	const std::vector<float>& cdf,
 	Accumulation& buffer,
 	std::mt19937& generator,
@@ -69,7 +66,7 @@ void ff::iterate(const Flame& flame,
 	// into some converged state
 	for (int i{ 0 }; i < 20; ++i) {
 		const Transformation& transformation{
-			chooseTransformation(cdf, generator, distribution, flame) };
+			chooseRandomTransformation(cdf, generator, distribution, flame) };
 
 		// apply it
 		// matrix multiplication:
@@ -78,32 +75,36 @@ void ff::iterate(const Flame& flame,
 		float y_affine = transformation.factors_.d_ * x +
 			transformation.factors_.e_ * y + transformation.factors_.f_;
 
-		applyVariations(transformation.variations_, x_affine, y_affine, x, y);
+		Point2D updated_point{ applyVariations(transformation.variations_, x_affine, y_affine) };
+		x = updated_point.x_;
+		y = updated_point.y_;
 
 		color = (color + transformation.color_) * 0.5f;
 	}
 
 	for (int i{ 0 }; i < iterations; ++i) {
 		const Transformation& transformation{
-			chooseTransformation(cdf, generator, distribution, flame) };
+			chooseRandomTransformation(cdf, generator, distribution, flame) };
 
 		float x_affine = transformation.factors_.a_ * x +
 			transformation.factors_.b_ * y + transformation.factors_.c_;
 		float y_affine = transformation.factors_.d_ * x +
 			transformation.factors_.e_ * y + transformation.factors_.f_;
 
-		applyVariations(transformation.variations_, x_affine, y_affine, x, y);
+		Point2D updated_point{ applyVariations(transformation.variations_, x_affine, y_affine) };
+		x = updated_point.x_;
+		y = updated_point.y_;
 
 		color = (color + transformation.color_) * 0.5f;
 
-		buffer.accumulate(x, y, color);
+		buffer.incrementFrequency(x, y, color);
 	}
 }
 
-void ff::runEngine(const Config& config) {
+void runEngine(Config& config) {
 	Flame flame{ config.transformation_ };
 
-	std::vector<float> cdf{ generateCDF(config.transformation_) };
+	std::vector<float> cdf{ generateDistribution(config.transformation_) };
 
 	Accumulation buffer{ config };
 
@@ -115,8 +116,8 @@ void ff::runEngine(const Config& config) {
 
 	int frame{};
 	int total_points{};
-	for (;;) {
-		FrameEvents events{ renderer.pollEvents() };
+	while (true) {
+		FrameEvents events{ renderer.fetchUserInput() };
 
 		if (events.quit_) {
 			break;
@@ -124,13 +125,13 @@ void ff::runEngine(const Config& config) {
 		if (events.save_) {
 			if (!utils::saveImage(generateTonemap(buffer, config.gui_width_, 
 				config.gui_height_), config)) {
-				// TODO: Add some logging here
+				// TODO: error logging
 			}
 		}
 
 		auto t1 = std::chrono::steady_clock::now();
 
-		iterate(flame, cdf, buffer, generator, distribution, config.iterations_);
+		runEngineIteration(flame, cdf, buffer, generator, distribution, config.iterations_);
 		total_points += config.iterations_;
 
 		auto t2 = std::chrono::steady_clock::now();
@@ -138,10 +139,10 @@ void ff::runEngine(const Config& config) {
 		float points_per_second{ static_cast<float>(config.iterations_ / (ms / 1000.0)) };
 
 		renderer.updateTelemetry(total_points, points_per_second);
-		renderer.update(buffer);
+		renderer.updateGUI(buffer);
 
 		if (frame % 10 == 0) {
-			renderer.update(buffer);
+			renderer.updateGUI(buffer);
 		}
 		++frame;
 	}

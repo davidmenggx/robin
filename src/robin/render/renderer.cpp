@@ -23,9 +23,7 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
-using namespace ff;
-
-Renderer::Renderer(const std::string& title, const Config& config)
+Renderer::Renderer(const std::string& title, Config& config)
 	: config_{ config }
 {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -79,7 +77,7 @@ Renderer::~Renderer() {
 	SDL_Quit();
 }
 
-FrameEvents Renderer::pollEvents() {
+FrameEvents Renderer::fetchUserInput() {
 	FrameEvents output{};
 	SDL_Event event{};
 	while (SDL_PollEvent(&event)) {
@@ -99,7 +97,7 @@ FrameEvents Renderer::pollEvents() {
 	return output;
 }
 
-void Renderer::update(Accumulation& buffer) {
+void Renderer::updateGUI(Accumulation& buffer) {
 	std::vector<Color> colors{ generateTonemap(buffer, config_.gui_width_, config_.gui_height_) };
 
 	SDL_UpdateTexture(texture_, nullptr, colors.data(), config_.gui_width_ * sizeof(Color));
@@ -109,7 +107,7 @@ void Renderer::update(Accumulation& buffer) {
 }
 
 void Renderer::updateTelemetry(int total_points, int current_points_per_second) {
-	hud_.push(current_points_per_second);
+	hud_.updatePointsHistory(current_points_per_second);
 	displayTelemetry(total_points, current_points_per_second);
 }
 

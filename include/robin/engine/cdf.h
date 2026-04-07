@@ -4,7 +4,7 @@
 
 #include <vector>
 
-namespace ff {
-	std::vector<float> generateCDF(const std::vector<Transformation>& transforms);
-	std::size_t drawCDF(const std::vector<float>& cdf, float random);
-}
+std::vector<float> generateDistribution(const std::vector<Transformation>& transforms);
+
+// Returns the first index in the CDF whose value is at least @cutoff
+std::size_t findIndex(const std::vector<float>& cdf, float cutoff);

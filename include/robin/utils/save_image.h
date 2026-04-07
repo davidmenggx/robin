@@ -6,5 +6,5 @@
 #include <vector>
 
 namespace utils {
-	bool saveImage(const std::vector<ff::Color>& buffer, const Config& config);
+	bool saveImage(const std::vector<Color>& buffer, Config& config);
 }

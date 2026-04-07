@@ -1,23 +1,24 @@
+#include "robin/color/gradient_stop.h"
 #include "robin/config.h"
 #include "robin/generation/affine.h"
 #include "robin/generation/transformation.h"
-#include "robin/utils/parse_settings.h"
+#include "robin/generation/variation.h"
+#include "robin/utils/parse_flame_options.h"
 
+#include <format>
 #include <fstream>
-#include <iostream>
 #include <stdexcept>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
-using namespace ff;
 using json = nlohmann::json;
 
-static std::vector<GradientPoint> extractGradient(json data) {
-	std::vector<GradientPoint> gradient{};
+static std::vector<GradientStop> extractGradient(json data) {
+	std::vector<GradientStop> gradient{};
 
 	for (const auto& item : data["gradient"]) {
-		GradientPoint point{};
+		GradientStop point{};
 
 		point.position_ = item.value("pos", 0.0f);
 		point.color_.red_ = item.value("r", 0);
@@ -55,7 +56,7 @@ static std::vector<Transformation> extractTransformations(json data) {
 			for (const auto& var : item["variations"]) {
 				Variation variation{};
 
-				variation.type_ = getType(var["type"]);
+				variation.type_ = getVariationType(var["type"]);
 				variation.weight_ = var.value("weight", 0.0f);
 
 				variations.push_back(variation);
@@ -71,7 +72,6 @@ static std::vector<Transformation> extractTransformations(json data) {
 }
 
 void utils::parseSettings(Config& config) {
-	// TODO: reserve some vector slots
 	std::ifstream file(config.input_name_ + ".json");
 
 	if (!file.is_open()) {

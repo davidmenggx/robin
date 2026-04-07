@@ -1,7 +1,6 @@
 #include "robin/color/accumulation.h"
 #include "robin/color/color.h"
 #include "robin/color/pixel_accumulation.h"
-#include "robin/constants.h"
 #include "robin/render/tonemap.h"
 
 #include <algorithm>
@@ -9,9 +8,7 @@
 #include <cstdint>
 #include <vector>
 
-using namespace ff;
-
-uint8_t ff::renderToRgb(float channel, float normalized_log_frequency) {
+static uint8_t applyImageFilters(float channel, float normalized_log_frequency) {
 	// exposure scaling
 	float output{ channel * normalized_log_frequency };
 
@@ -22,12 +19,12 @@ uint8_t ff::renderToRgb(float channel, float normalized_log_frequency) {
 	return static_cast<uint8_t>(std::clamp(output * 255.0, 0.0, 255.0));
 }
 
-std::vector<Color> ff::generateTonemap(Accumulation& buffer, int width, int height) {
+std::vector<Color> generateTonemap(Accumulation& buffer, int width, int height) {
 	const int image_size{ width * height };
 
 	std::vector<Color> output(image_size, { 0, 0, 0 });
 
-	int max_frequency{ buffer.getMaxFrequency() };
+	int max_frequency{ buffer.getMaxColorFrequency() };
 	// empty image
 	if (max_frequency == 0) {
 		return output;
@@ -35,7 +32,7 @@ std::vector<Color> ff::generateTonemap(Accumulation& buffer, int width, int heig
 
 	for (int y{ 0 }; y < height; ++y) {
 		for (int x{ 0 }; x < width; ++x) {
-			PixelAccumulation& pixel{ buffer.get(x, y) };
+			PixelAccumulation& pixel{ buffer.getPixelFrequency(x, y) };
 			if (pixel.frequency_ == 0) {
 				continue;
 			}
@@ -47,9 +44,9 @@ std::vector<Color> ff::generateTonemap(Accumulation& buffer, int width, int heig
 						/ std::log(max_frequency + 1.0f)) };
 
 			output[output_idx] = {
-				renderToRgb(pixel.red_, normalized_log_frequency),
-				renderToRgb(pixel.green_, normalized_log_frequency),
-				renderToRgb(pixel.blue_, normalized_log_frequency)
+				applyImageFilters(pixel.red_, normalized_log_frequency),
+				applyImageFilters(pixel.green_, normalized_log_frequency),
+				applyImageFilters(pixel.blue_, normalized_log_frequency)
 			};
 		}
 	}

@@ -10,9 +10,7 @@
 
 #include "stb/stb_image_write.h"
 
-using namespace ff;
-
-bool utils::saveImage(const std::vector<ff::Color>& buffer, const Config& config) {
+bool utils::saveImage(const std::vector<Color>& buffer, Config& config) {
 	// width x # of color channels
 	int stride{ config.gui_width_ * constants::kColorChannels };
 

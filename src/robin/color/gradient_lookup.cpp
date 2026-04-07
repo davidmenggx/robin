@@ -1,6 +1,6 @@
 #include "robin/color/color.h"
 #include "robin/color/gradient_lookup.h"
-#include "robin/color/gradient_point.h"
+#include "robin/color/gradient_stop.h"
 #include "robin/constants.h"
 
 #include <algorithm>
@@ -8,15 +8,13 @@
 #include <iterator>
 #include <vector>
 
-using namespace ff;
-
-GradientLookup::GradientLookup(const std::vector<GradientPoint>& gradient_points) {
+GradientLookup::GradientLookup(std::vector<GradientStop>& gradient_points) {
 	for (int i{ 0 }; i < constants::kGradientLookupSize; ++i) {
 		float transition_position{ static_cast<float>(i) / (constants::kGradientLookupSize - 1) };
 
-		GradientPoint lower_bound{ gradient_points.front() };
-		GradientPoint upper_bound{ gradient_points.back() };
-		for (std::size_t j{ 0 }; j < std::size(gradient_points); ++j) {
+		GradientStop lower_bound{ gradient_points.front() };
+		GradientStop upper_bound{ gradient_points.back() };
+		for (std::size_t j{ 0 }; j < std::size(gradient_points) - 1; ++j) {
 			if (transition_position >= gradient_points[j].position_ &&
 				transition_position <= gradient_points[j + 1].position_) {
 				lower_bound = gradient_points[j];
@@ -52,8 +50,9 @@ GradientLookup::GradientLookup(const std::vector<GradientPoint>& gradient_points
 	}
 }
 
-Color GradientLookup::sample(float color) {
-	int index{ static_cast<int>(color * (constants::kGradientLookupSize - 1)) };
-	index = std::clamp(index, 0, constants::kGradientLookupSize - 1);
-	return lookup_table_[index];
+Color GradientLookup::sampleGradientColor(float position) {
+	int idx{ static_cast<int>(position * (constants::kGradientLookupSize - 1)) };
+	idx = std::clamp(idx, 0, constants::kGradientLookupSize - 1);
+
+	return lookup_table_[idx];
 }

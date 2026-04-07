@@ -1,21 +1,21 @@
 #pragma once
 
 #include "constants.h"
-#include "robin/color/gradient_point.h"
+#include "robin/color/color.h"
+#include "robin/color/gradient_stop.h"
 #include "robin/generation/transformation.h"
-#include "robin/render/color.h"
 
 #include <string>
 #include <vector>
 
 struct Config {
-	std::vector<ff::Transformation> transformation_{};
-	std::vector<ff::GradientPoint> gradient_{ { ff::kGradientPoints } };
+	std::vector<Transformation> transformation_{ constants::kDefaultTransformation };
+	std::vector<GradientStop> gradient_{ constants::kDefaultGradientStops };
 
-	render::Color background_{ constants::kBackground };
+	Color background_{ constants::kBackground };
 
-	std::string output_name_{ "output" };
-	std::string input_name_{ "input" };
+	std::string input_name_{ constants::kInputFilename };
+	std::string output_name_{ constants::kOutputFilename };
 
 	long long iterations_{ constants::kIterationsPerUpdate };
 
