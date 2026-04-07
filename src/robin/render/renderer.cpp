@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_keycode.h>
@@ -27,7 +28,7 @@ Renderer::Renderer(const std::string& title, Config& config)
 	: config_{ config }
 {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {
-		throw std::runtime_error(std::string("SDL initialization error: ") + SDL_GetError());
+		throw std::runtime_error(std::format("SDL initialization error: {}", SDL_GetError()));
 	}
 
 	// SDL flag type
@@ -40,7 +41,7 @@ Renderer::Renderer(const std::string& title, Config& config)
 		title.c_str(), config.gui_width_, config.gui_height_,
 		window_flags, &window_, &renderer_)) {
 		SDL_Quit();
-		throw std::runtime_error(std::string("Window/Renderer creation failed: ") + SDL_GetError());
+		throw std::runtime_error(std::format("Window/Renderer creation failed: {}", SDL_GetError()));
 	}
 
 	texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32,
@@ -50,7 +51,7 @@ Renderer::Renderer(const std::string& title, Config& config)
 		SDL_DestroyRenderer(renderer_);
 		SDL_DestroyWindow(window_);
 		SDL_Quit();
-		throw std::runtime_error(std::string("Texture creation failed: ") + SDL_GetError());
+		throw std::runtime_error(std::format("Texture creation failed: {}", SDL_GetError()));
 	}
 
 	if (config.show_telemetry_) {
