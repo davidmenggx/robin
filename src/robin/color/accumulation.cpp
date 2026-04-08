@@ -29,8 +29,10 @@ Accumulation::Accumulation(Config& config)
 
 std::pair<int, int> Accumulation::projectToScreen(float x, float y) {
 	return {
-	  static_cast<int>(x * constants::kPixelsPerUnit + (config_.gui_width_ / 2.0f)),
-	  static_cast<int>(y * constants::kPixelsPerUnit + (config_.gui_height_ / 2.0f))
+	  static_cast<int>((x - config_.camera_center_x_) * config_.camera_scale_
+						 + config_.gui_width_ / 2.0f),
+		static_cast<int>((y - config_.camera_center_y_) * config_.camera_scale_
+						 + config_.gui_height_ / 2.0f)
 	};
 }
 

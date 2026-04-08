@@ -22,6 +22,10 @@ struct Config {
 	int gui_width_{ constants::kWidth };
 	int gui_height_{ constants::kHeight };
 
+	int camera_center_x_{};
+	int camera_center_y_{};
+	float camera_scale_{ constants::kPixelsPerUnit };
+
 	bool show_telemetry_{};
 	bool fullscreen_{};
 };

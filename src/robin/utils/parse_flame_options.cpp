@@ -1,5 +1,6 @@
 #include "robin/color/gradient_stop.h"
 #include "robin/config.h"
+#include "robin/constants.h"
 #include "robin/generation/affine.h"
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
@@ -86,6 +87,12 @@ void utils::parseSettings(Config& config) {
 		// this is a bit sketchy (catch then rethrow)
 		// i guess it encapsulates the json library to just this file
 		throw std::runtime_error{ e.what() };
+	}
+
+	if (data.contains("camera")) {
+		config.camera_center_x_ = data["camera"].value("center_x", 0);
+		config.camera_center_y_ = data["camera"].value("center_y", 0);
+		config.camera_scale_ = data["camera"].value("scale", constants::kPixelsPerUnit);
 	}
 
 	if (data.contains("gradient") && data["gradient"].is_array()) {

@@ -13,6 +13,7 @@
 
 #include <chrono>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <ratio>
 #include <vector>
@@ -125,21 +126,19 @@ void runEngine(Config& config) {
 		if (events.save_) {
 			if (!utils::saveImage(generateTonemap(buffer, config.gui_width_, 
 				config.gui_height_), config)) {
-				// TODO: error logging
+				std::cerr << "Failed to save image output";
 			}
 		}
 
 		auto t1 = std::chrono::steady_clock::now();
-
 		runEngineIteration(flame, cdf, buffer, generator, distribution, config.iterations_);
 		total_points += config.iterations_;
-
 		auto t2 = std::chrono::steady_clock::now();
-		float ms{ static_cast<float>(std::chrono::duration<float, std::milli>(t2 - t1).count()) };
-		float points_per_second{ static_cast<float>(config.iterations_ / (ms / 1000.0)) };
+
+		float ms{ std::chrono::duration<float, std::milli>(t2 - t1).count() };
+		float points_per_second{ config.iterations_ / (ms / 1000.0f) };
 
 		renderer.updateTelemetry(total_points, points_per_second);
-		renderer.updateGUI(buffer);
 
 		if (frame % 10 == 0) {
 			renderer.updateGUI(buffer);
