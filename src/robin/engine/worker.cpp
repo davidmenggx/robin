@@ -30,15 +30,12 @@ static const Transformation& chooseRandomTransformation(
 
 // Each Transformation object is composed of one or more variations, apply them and return the updated result
 static Point2D applyVariations(const std::vector<Variation>& variations, float x, float y) {
-	float radius{ std::sqrt(x * x + y * y) };
-	float theta{ std::atan2(y, x) };
-	float phi{ std::atan2(x, y) };
 
 	float x_accumulated{};
 	float y_accumulated{};
 
 	for (const Variation& variation : variations) {
-		Point2D updated_point{ applyVariation(variation.type_, x, y, radius, theta, phi) };
+		Point2D updated_point{ applyVariation(variation.type_, x, y) };
 		x_accumulated += variation.weight_ * updated_point.x_;
 		y_accumulated += variation.weight_ * updated_point.y_;
 	}

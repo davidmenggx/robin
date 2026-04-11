@@ -38,5 +38,4 @@ struct Variation {
 * 
 * @throws std::domain_error if type is unknown
 */
-Point2D applyVariation(VariationType type, float x, float y,
-	float radius = 0, float theta = 0, float phi = 0);
+Point2D applyVariation(VariationType type, float x, float y);

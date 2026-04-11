@@ -1,5 +1,3 @@
-// TODO: perhaps we can remove this engine altogether after going for a worker approach
-
 #include "robin/color/accumulation.h"
 #include "robin/config.h"
 #include "robin/engine/cdf.h"
@@ -23,7 +21,7 @@ Engine::Engine(Config& config)
 {}
 
 void Engine::run() {
-	unsigned int num_threads{ std::thread::hardware_concurrency() };
+	unsigned int num_threads{ std::thread::hardware_concurrency() - 1 };
 	if (num_threads == 0) {
 		num_threads = 4;
 	}
