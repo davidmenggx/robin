@@ -7,7 +7,6 @@
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
 
-#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <random>
@@ -17,13 +16,18 @@
 #include <vector>
 
 static const Transformation& chooseRandomTransformation(
-	const std::vector<float>& cdf,
+	AliasTable& alias,
 	std::mt19937& generator,
 	std::uniform_real_distribution<float>& distribution,
 	const Flame& flame) {
 
-	float random{ distribution(generator) };
-	std::size_t transformation_idx{ findIndex(cdf, random) };
+	// our findIndex function requires two random numbers: an index (size t) and a float
+	// instead i just randomly generate one float and truncate it appropraitely to extract
+	// both values
+	float combined_random{ distribution(generator) };
+	std::size_t uniform_idx{ static_cast<std::size_t>(combined_random) };
+	float uniform_float = combined_random - static_cast<float>(uniform_idx);
+	std::size_t transformation_idx{ findIndex(alias, uniform_float, uniform_idx) };
 
 	return flame.transformations_[transformation_idx];
 }
@@ -43,10 +47,11 @@ static Point2D applyVariations(const std::vector<Variation>& variations, float x
 	return { x_accumulated, y_accumulated };
 }
 
-Worker::Worker(const Flame& flame, const std::vector<float>& cdf, Config& config,
+Worker::Worker(const Flame& flame, AliasTable& alias, Config& config,
 	std::function<void(const Accumulation&, uint64_t)> flush_callback)
-	: flame_{ flame }, cdf_{ cdf }, config_{ config }, buffer_{ config_ }, flush_callback_{ std::move(flush_callback) }
+	: flame_{ flame }, alias_{ alias }, config_{ config }, buffer_{ config_ }, flush_callback_{ std::move(flush_callback) }
 {
+	distribution_ = std::uniform_real_distribution<float>(0.0f, static_cast<float>(alias_.probabilities.size()));
 }
 
 void Worker::start() {
@@ -68,7 +73,7 @@ void Worker::run(std::stop_token stoken) {
 	// into some converged state
 	for (int i{ 0 }; i < 20; ++i) {
 		const Transformation& transformation{
-			chooseRandomTransformation(cdf_, generator_, distribution_, flame_) };
+			chooseRandomTransformation(alias_, generator_, distribution_, flame_) };
 
 		// apply it
 		// matrix multiplication:
@@ -87,7 +92,7 @@ void Worker::run(std::stop_token stoken) {
 	while (!stoken.stop_requested()) {
 		for (int i{ 0 }; i < config_.iterations_; ++i) {
 			const Transformation& t{
-				chooseRandomTransformation(cdf_, generator_, distribution_, flame_) };
+				chooseRandomTransformation(alias_, generator_, distribution_, flame_) };
 
 			float x_affine{ t.factors_.a_ * x + t.factors_.b_ * y + t.factors_.c_ };
 			float y_affine{ t.factors_.d_ * x + t.factors_.e_ * y + t.factors_.f_ };

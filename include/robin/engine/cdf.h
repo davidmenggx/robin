@@ -4,7 +4,12 @@
 
 #include <vector>
 
-std::vector<float> generateDistribution(const std::vector<Transformation>& transforms);
+struct AliasTable {
+    std::vector<float> probabilities;
+    std::vector<std::size_t> aliases;
+};
+
+AliasTable generateDistribution(const std::vector<Transformation>& transforms);
 
 // Returns the first index in the CDF whose value is at least @cutoff
-std::size_t findIndex(const std::vector<float>& cdf, float cutoff);
+std::size_t findIndex(const AliasTable& table, float uniformZeroToOne, std::size_t uniformIndex);

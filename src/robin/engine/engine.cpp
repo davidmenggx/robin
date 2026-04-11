@@ -17,8 +17,9 @@
 
 Engine::Engine(Config& config)
 	: config_{ config }, master_buffer_{ config }, renderer_{ "robin", config }
-	, flame_{ config.transformation_ }, cdf_{ generateDistribution(config.transformation_) }
-{}
+	, flame_{ config.transformation_ }, alias_{ generateDistribution(config.transformation_) }
+{
+}
 
 void Engine::run() {
 	unsigned int num_threads{ std::thread::hardware_concurrency() - 1 };
@@ -31,7 +32,7 @@ void Engine::run() {
 			this->flushWorkerBuffer(local_buffer, points_processed);
 			};
 
-		workers_.push_back(std::make_unique<Worker>(flame_, cdf_, config_, callback));
+		workers_.push_back(std::make_unique<Worker>(flame_, alias_, config_, callback));
 		workers_.back()->start();
 	}
 

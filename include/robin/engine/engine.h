@@ -2,12 +2,12 @@
 
 #include "robin/color/accumulation.h"
 #include "robin/config.h"
+#include "robin/engine/cdf.h"
 #include "robin/engine/worker.h"
 #include "robin/generation/flame.h"
 #include "robin/render/renderer.h"
 
 #include <atomic>
-#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -24,7 +24,7 @@ private:
 
 	Config& config_;
 	Flame flame_{};
-	std::vector<float> cdf_{};
+	AliasTable alias_{};
 
 	Accumulation master_buffer_;
 	std::mutex master_mutex_{};
