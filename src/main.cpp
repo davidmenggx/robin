@@ -36,7 +36,8 @@ int main(int argc, char** argv) {
 		std::cerr << std::format("Failed to load flame JSON data: {}", e.what());
 	}
 
-	runEngine(config);
+	Engine engine{ config };
+	engine.run();
 
 	return 0;
 }

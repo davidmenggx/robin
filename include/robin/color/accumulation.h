@@ -17,6 +17,10 @@ public:
 
 	void incrementFrequency(float x, float y, float color);
 
+	void merge(const Accumulation& local_buffer);
+
+	void clear();
+
 private:
 	Config& config_;
 

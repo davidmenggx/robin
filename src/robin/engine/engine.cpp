@@ -1,148 +1,94 @@
+// TODO: perhaps we can remove this engine altogether after going for a worker approach
+
 #include "robin/color/accumulation.h"
 #include "robin/config.h"
 #include "robin/engine/cdf.h"
 #include "robin/engine/engine.h"
-#include "robin/generation/flame.h"
-#include "robin/generation/point2d.h"
-#include "robin/generation/transformation.h"
-#include "robin/generation/variation.h"
+#include "robin/engine/worker.h"
 #include "robin/render/frame_events.h"
-#include "robin/render/renderer.h"
 #include "robin/render/tonemap.h"
 #include "robin/utils/save_image.h"
 
 #include <chrono>
-#include <cmath>
+#include <cstdint>
+#include <functional>
 #include <iostream>
-#include <random>
-#include <ratio>
-#include <vector>
+#include <memory>
+#include <mutex>
+#include <thread>
 
-static const Transformation& chooseRandomTransformation(
-	const std::vector<float>& cdf,
-	std::mt19937& generator,
-	std::uniform_real_distribution<float>& distribution,
-	const Flame& flame) {
+Engine::Engine(Config& config)
+	: config_{ config }, master_buffer_{ config }, renderer_{ "robin", config }
+	, flame_{ config.transformation_ }, cdf_{ generateDistribution(config.transformation_) }
+{}
 
-	float random{ distribution(generator) };
-	std::size_t transformation_idx{ findIndex(cdf, random) };
-
-	return flame.transformations_[transformation_idx];
-}
-
-// Each Transformation object is composed of one or more variations, apply them and return the updated result
-static Point2D applyVariations(const std::vector<Variation>& variations, float x, float y) {
-	float radius{ std::sqrt(x * x + y * y) };
-	float theta{ std::atan2(y, x) };
-	float phi{ std::atan2(x, y) };
-
-	float x_accumulated{};
-	float y_accumulated{};
-
-	for (const Variation& variation : variations) {
-		Point2D updated_point{ applyVariation(variation.type_, x, y, radius, theta, phi) };
-		x_accumulated += variation.weight_ * updated_point.x_;
-		y_accumulated += variation.weight_ * updated_point.y_;
+void Engine::run() {
+	unsigned int num_threads{ std::thread::hardware_concurrency() };
+	if (num_threads == 0) {
+		num_threads = 4;
 	}
 
-	return { x_accumulated, y_accumulated };
-}
+	for (unsigned int i{ 0 }; i < num_threads; ++i) {
+		std::function<void(const Accumulation&, uint64_t)> callback = [this](const Accumulation& local_buffer, uint64_t points_processed) {
+			this->flushWorkerBuffer(local_buffer, points_processed);
+			};
 
-static void runEngineIteration(const Flame& flame,
-	const std::vector<float>& cdf,
-	Accumulation& buffer,
-	std::mt19937& generator,
-	std::uniform_real_distribution<float>& distribution,
-	int iterations) {
-	// it doesn't rlly matter where we start at (see next lines)
-	// for now our point starts with -1 <= x, y <= 1
-	float x{ distribution(generator) * 2.0f - 1.0f };
-	float y{ distribution(generator) * 2.0f - 1.0f };
-	float color{ distribution(generator) };
-
-	// our random initialization of the point means that the first few
-	// iterations will quickly converge to some pattern, but this should
-	// not be included in the final drawing (b/c it's ugly).
-	// So I set the point in motion without accumulating color to settle
-	// into some converged state
-	for (int i{ 0 }; i < 20; ++i) {
-		const Transformation& transformation{
-			chooseRandomTransformation(cdf, generator, distribution, flame) };
-
-		// apply it
-		// matrix multiplication:
-		float x_affine = transformation.factors_.a_ * x +
-			transformation.factors_.b_ * y + transformation.factors_.c_;
-		float y_affine = transformation.factors_.d_ * x +
-			transformation.factors_.e_ * y + transformation.factors_.f_;
-
-		Point2D updated_point{ applyVariations(transformation.variations_, x_affine, y_affine) };
-		x = updated_point.x_;
-		y = updated_point.y_;
-
-		color = (color + transformation.color_) * 0.5f;
+		workers_.push_back(std::make_unique<Worker>(flame_, cdf_, config_, callback));
+		workers_.back()->start();
 	}
 
-	for (int i{ 0 }; i < iterations; ++i) {
-		const Transformation& transformation{
-			chooseRandomTransformation(cdf, generator, distribution, flame) };
+	int frame{ 0 };
 
-		float x_affine = transformation.factors_.a_ * x +
-			transformation.factors_.b_ * y + transformation.factors_.c_;
-		float y_affine = transformation.factors_.d_ * x +
-			transformation.factors_.e_ * y + transformation.factors_.f_;
+	auto last_telemetry_time = std::chrono::steady_clock::now();
+	uint64_t last_telemetry_points{ total_points_.load() };
 
-		Point2D updated_point{ applyVariations(transformation.variations_, x_affine, y_affine) };
-		x = updated_point.x_;
-		y = updated_point.y_;
+	auto last_frame_time = std::chrono::steady_clock::now();
 
-		color = (color + transformation.color_) * 0.5f;
-
-		buffer.incrementFrequency(x, y, color);
-	}
-}
-
-void runEngine(Config& config) {
-	Flame flame{ config.transformation_ };
-
-	std::vector<float> cdf{ generateDistribution(config.transformation_) };
-
-	Accumulation buffer{ config };
-
-	std::random_device device{};
-	std::mt19937 generator(device());
-	std::uniform_real_distribution<float> distribution{ 0, 1 };
-
-	Renderer renderer{ "robin", config };
-
-	int frame{};
-	int total_points{};
 	while (true) {
-		FrameEvents events{ renderer.fetchUserInput() };
+		FrameEvents events{ renderer_.fetchUserInput() };
+		if (events.quit_) break;
 
-		if (events.quit_) {
-			break;
-		}
 		if (events.save_) {
-			if (!utils::saveImage(generateTonemap(buffer, config.gui_width_, 
-				config.gui_height_), config)) {
-				std::cerr << "Failed to save image output";
+			std::lock_guard<std::mutex> lock(master_mutex_);
+			if (!utils::saveImage(generateTonemap(master_buffer_, config_.gui_width_, config_.gui_height_), config_)) {
+				std::cerr << "Failed to save image output\n";
 			}
 		}
 
-		auto t1 = std::chrono::steady_clock::now();
-		runEngineIteration(flame, cdf, buffer, generator, distribution, config.iterations_);
-		total_points += config.iterations_;
-		auto t2 = std::chrono::steady_clock::now();
+		auto current_time = std::chrono::steady_clock::now();
+		auto time_since_last_frame = current_time - last_frame_time;
 
-		float ms{ std::chrono::duration<float, std::milli>(t2 - t1).count() };
-		float points_per_second{ config.iterations_ / (ms / 1000.0f) };
+		// update output around 60 fps
+		if (time_since_last_frame >= std::chrono::milliseconds(16)) {
+			float elapsed_seconds{ std::chrono::duration<float>(current_time - last_telemetry_time).count() };
 
-		renderer.updateTelemetry(total_points, points_per_second);
+			if (elapsed_seconds >= 0.25f) {
+				uint64_t current_points{ total_points_.load() };
+				uint64_t points_processed{ current_points - last_telemetry_points };
+				double points_per_second{ static_cast<double>(points_processed) / elapsed_seconds };
 
-		if (frame % 10 == 0) {
-			renderer.updateGUI(buffer);
+				renderer_.updateTelemetry(current_points, points_per_second);
+
+				last_telemetry_time = current_time;
+				last_telemetry_points = current_points;
+			}
+
+			{
+				std::lock_guard<std::mutex> lock(master_mutex_);
+				renderer_.updateGUI(master_buffer_);
+			}
+
+			last_frame_time = current_time;
 		}
-		++frame;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
+
+	// cleanup (only works bc i use jthread)
+	workers_.clear();
+}
+
+void Engine::flushWorkerBuffer(const Accumulation& local_buffer, uint64_t points_processed) {
+	std::lock_guard<std::mutex> lock(master_mutex_);
+	master_buffer_.merge(local_buffer);
+	total_points_ += points_processed;
 }

@@ -22,9 +22,10 @@ static uint8_t applyImageFilters(float channel, float normalized_log_frequency) 
 std::vector<Color> generateTonemap(Accumulation& buffer, int width, int height) {
 	const int image_size{ width * height };
 
-	std::vector<Color> output(image_size, { 0, 0, 0 });
+	std::vector<Color> output(image_size, { 0, 0, 0, 255 });
 
 	int max_frequency{ buffer.getMaxColorFrequency() };
+
 	// empty image
 	if (max_frequency == 0) {
 		return output;
@@ -43,10 +44,15 @@ std::vector<Color> generateTonemap(Accumulation& buffer, int width, int height) 
 			float normalized_log_frequency{ static_cast<float>(std::log(pixel.frequency_ + 1.0f)
 						/ std::log(max_frequency + 1.0f)) };
 
+			float base_r{ pixel.red_ / pixel.frequency_ };
+			float base_g{ pixel.green_ / pixel.frequency_ };
+			float base_b{ pixel.blue_ / pixel.frequency_ };
+
 			output[output_idx] = {
-				applyImageFilters(pixel.red_, normalized_log_frequency),
-				applyImageFilters(pixel.green_, normalized_log_frequency),
-				applyImageFilters(pixel.blue_, normalized_log_frequency)
+				applyImageFilters(base_r, normalized_log_frequency),
+				applyImageFilters(base_g, normalized_log_frequency),
+				applyImageFilters(base_b, normalized_log_frequency),
+				255
 			};
 		}
 	}

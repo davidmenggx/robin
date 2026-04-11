@@ -22,10 +22,10 @@ namespace constants {
 	// runtime telemetry constants
 	inline constexpr int kTelemetryWidth{ 800 };
 	inline constexpr int kTelemetryHeight{ 800 };
-	inline constexpr int kTelemetryHistorySize{ 500 }; // how many samples saved
+	inline constexpr int kTelemetryHistorySize{ 100 }; // how many samples saved
 	inline constexpr int kTelemetryTicks{ 4 };
 
-	inline constexpr long long kIterationsPerUpdate{ 50'000ll };
+	inline constexpr long long kIterationsPerUpdate{ 1'000'000ll };
 	inline constexpr int kFramesPerUpdate{ 10 };
 
 	// rendering constants:

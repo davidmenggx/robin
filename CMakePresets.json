@@ -33,6 +33,14 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "x64-relwithdebinfo",
+      "displayName": "Windows x64 RelWithDebInfo",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
     }
   ],
   "buildPresets": [
@@ -41,8 +49,12 @@
       "configurePreset": "x64-debug"
     },
     {
-      "name": "release",
+      "name": "release",  
       "configurePreset": "x64-release"
+    },
+    {
+      "name": "relwithdebinfo",
+      "configurePreset": "x64-relwithdebinfo"
     }
   ]
 }
