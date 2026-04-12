@@ -22,6 +22,10 @@ public:
 	void clear();
 
 private:
+	std::pair<int, int> projectToScreen(float x, float y);
+
+	// unfortunately for padding the config needs to be initialized rather
+	// early so that we don't get weird seg faults in the constructor
 	Config& config_;
 
 	// flattened histogram representing the pixels on the screen.
@@ -33,6 +37,4 @@ private:
 	// a lookup table for sampling continuous gradient RGB tuples, generated
 	// from a finite set of gradient stop points
 	GradientLookup gradient_lookup_;
-
-	std::pair<int, int> projectToScreen(float x, float y);
 };

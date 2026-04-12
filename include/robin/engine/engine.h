@@ -2,7 +2,7 @@
 
 #include "robin/color/accumulation.h"
 #include "robin/config.h"
-#include "robin/engine/cdf.h"
+#include "robin/distribution/alias_distribution.h"
 #include "robin/engine/worker.h"
 #include "robin/generation/flame.h"
 #include "robin/render/renderer.h"
@@ -22,16 +22,18 @@ public:
 private:
 	void flushWorkerBuffer(const Accumulation& local_buffer, uint64_t points_processed);
 
-	Config& config_;
-	Flame flame_{};
-	AliasTable alias_{};
-
 	Accumulation master_buffer_;
+
+	Renderer renderer_;
+
+	Config& config_;
+
 	std::mutex master_mutex_{};
+
+	AliasTable alias_{};
+	Flame flame_{};
 
 	std::vector<std::unique_ptr<Worker>> workers_{};
 
 	std::atomic<uint64_t> total_points_{};
-
-	Renderer renderer_;
 };

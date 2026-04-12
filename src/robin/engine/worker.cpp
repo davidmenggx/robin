@@ -1,6 +1,7 @@
 #include "robin/color/accumulation.h"
 #include "robin/config.h"
-#include "robin/engine/cdf.h"
+#include "robin/distribution/alias_distribution.h"
+#include "robin/distribution/xoshiro.h"
 #include "robin/engine/worker.h"
 #include "robin/generation/flame.h"
 #include "robin/generation/point2d.h"
@@ -9,7 +10,7 @@
 
 #include <cstdint>
 #include <functional>
-#include <random>
+#include <limits>
 #include <stop_token>
 #include <thread>
 #include <utility>
@@ -17,15 +18,16 @@
 
 static const Transformation& chooseRandomTransformation(
 	AliasTable& alias,
-	std::mt19937& generator,
-	std::uniform_real_distribution<float>& distribution,
+	Xoshiro256& generator,
+	float alias_scale,
 	const Flame& flame) {
 
 	// our findIndex function requires two random numbers: an index (size t) and a float
 	// instead i just randomly generate one float and truncate it appropraitely to extract
 	// both values
-	float combined_random{ distribution(generator) };
-	std::size_t uniform_idx{ static_cast<std::size_t>(combined_random) };
+	double uniform01{ static_cast<double>(generator()) / static_cast<double>(std::numeric_limits<uint64_t>::max()) };
+	float combined_random = static_cast<float>(uniform01 * alias_scale);
+	std::size_t uniform_idx = static_cast<std::size_t>(combined_random);
 	float uniform_float = combined_random - static_cast<float>(uniform_idx);
 	std::size_t transformation_idx{ findIndex(alias, uniform_float, uniform_idx) };
 
@@ -49,9 +51,10 @@ static Point2D applyVariations(const std::vector<Variation>& variations, float x
 
 Worker::Worker(const Flame& flame, AliasTable& alias, Config& config,
 	std::function<void(const Accumulation&, uint64_t)> flush_callback)
-	: flame_{ flame }, alias_{ alias }, config_{ config }, buffer_{ config_ }, flush_callback_{ std::move(flush_callback) }
+	: flame_{ flame }, alias_{ alias }, config_{ config }, buffer_{ config_ }
+	, flush_callback_{ std::move(flush_callback) }, generator_{ 5 } // TODO: choose a better see
 {
-	distribution_ = std::uniform_real_distribution<float>(0.0f, static_cast<float>(alias_.probabilities.size()));
+	alias_scale_ = alias_.probabilities.size();
 }
 
 void Worker::start() {
@@ -62,9 +65,9 @@ void Worker::start() {
 void Worker::run(std::stop_token stoken) {
 	// it doesn't rlly matter where we start at (see next lines)
 	// for now our point starts with -1 <= x, y <= 1
-	float x{ distribution_(generator_) * 2.0f - 1.0f };
-	float y{ distribution_(generator_) * 2.0f - 1.0f };
-	float color{ distribution_(generator_) };
+	float x{ generator_() * 2.0f - 1.0f };
+	float y{ generator_() * 2.0f - 1.0f };
+	float color{ static_cast<float>(generator_()) };
 
 	// our random initialization of the point means that the first few
 	// iterations will quickly converge to some pattern, but this should
@@ -73,7 +76,7 @@ void Worker::run(std::stop_token stoken) {
 	// into some converged state
 	for (int i{ 0 }; i < 20; ++i) {
 		const Transformation& transformation{
-			chooseRandomTransformation(alias_, generator_, distribution_, flame_) };
+			chooseRandomTransformation(alias_, generator_, alias_scale_, flame_) };
 
 		// apply it
 		// matrix multiplication:
@@ -92,7 +95,7 @@ void Worker::run(std::stop_token stoken) {
 	while (!stoken.stop_requested()) {
 		for (int i{ 0 }; i < config_.iterations_; ++i) {
 			const Transformation& t{
-				chooseRandomTransformation(alias_, generator_, distribution_, flame_) };
+				chooseRandomTransformation(alias_, generator_, alias_scale_, flame_) };
 
 			float x_affine{ t.factors_.a_ * x + t.factors_.b_ * y + t.factors_.c_ };
 			float y_affine{ t.factors_.d_ * x + t.factors_.e_ * y + t.factors_.f_ };

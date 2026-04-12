@@ -1,6 +1,6 @@
 #include "robin/color/accumulation.h"
 #include "robin/config.h"
-#include "robin/engine/cdf.h"
+#include "robin/distribution/alias_distribution.h"
 #include "robin/engine/engine.h"
 #include "robin/engine/worker.h"
 #include "robin/render/frame_events.h"
@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <format>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -26,6 +27,8 @@ void Engine::run() {
 	if (num_threads == 0) {
 		num_threads = 4;
 	}
+
+	std::cout << std::format("Engine running on {} threads", num_threads) << '\n';
 
 	for (unsigned int i{ 0 }; i < num_threads; ++i) {
 		std::function<void(const Accumulation&, uint64_t)> callback = [this](const Accumulation& local_buffer, uint64_t points_processed) {

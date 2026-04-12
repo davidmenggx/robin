@@ -24,6 +24,8 @@ public:
 private:
 	void displayTelemetry(int total_points, int current_points_per_second);
 
+	TelemetryHUD hud_{};
+
 	Config& config_;
 
 	SDL_Window* window_{};
@@ -32,8 +34,6 @@ private:
 
 	SDL_Window* telemetry_window_{};
 	SDL_Renderer* telemetry_renderer_{};
-
-	TelemetryHUD hud_{};
 
 	enum class TextAlignment { kLeft, kMiddle, kRight };
 	TTF_Font* font_{};

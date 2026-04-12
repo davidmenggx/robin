@@ -1,4 +1,4 @@
-#include "robin/engine/cdf.h"
+#include "robin/distribution/alias_distribution.h"
 #include "robin/generation/transformation.h"
 
 #include <queue>

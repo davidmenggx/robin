@@ -53,23 +53,23 @@ namespace constants {
 	inline const std::vector<Transformation> kDefaultTransformation{ 
 		{
 			// First transformation
-			{ 0.75f,  0.15f, 0.00f, -0.15f,  0.75f, 0.00f},
-			1.0f, 0.0f, {{VariationType::kSpherical, 0.6f}, {VariationType::kLinear, 0.4f}}
+			{{VariationType::kSpherical, 0.6f}, {VariationType::kLinear, 0.4f}},
+			{ 0.75f,  0.15f, 0.00f, -0.15f,  0.75f, 0.00f}, 1.0f, 0.0f
 		},
 		{
 			// Second transformation
-			{ 0.50f,  0.00f,  1.20f, 0.00f,  0.50f, -0.80f},
-			1.0f, 0.33f, {{VariationType::kSinusoidal, 0.8f}, {VariationType::kLinear, 0.2f}}
+			{{VariationType::kSinusoidal, 0.8f}, {VariationType::kLinear, 0.2f}},
+			{ 0.50f,  0.00f,  1.20f, 0.00f,  0.50f, -0.80f}, 1.0f, 0.33f
 		},
 		{
 			// Third transformation
-			{ 0.40f, -0.40f, -1.00f, 0.40f,  0.40f,  0.50f},
-			1.0f, 0.66f, {{VariationType::kHorseshoe, 0.5f}, {VariationType::kLinear, 0.5f}}
+			{{VariationType::kHorseshoe, 0.5f}, {VariationType::kLinear, 0.5f}},
+			{ 0.40f, -0.40f, -1.00f, 0.40f,  0.40f,  0.50f}, 1.0f, 0.66f
 		},
 		{
 			// Fourth transformation
-			{ 0.60f,  0.40f,  0.00f, -0.40f,  0.60f,  1.20f},
-			1.0f, 1.0f, {{VariationType::kSwirl, 0.4f}, {VariationType::kLinear, 0.6f}}
+			{{VariationType::kSwirl, 0.4f}, {VariationType::kLinear, 0.6f}},
+			{ 0.60f,  0.40f,  0.00f, -0.40f,  0.60f,  1.20f}, 1.0f, 1.0f
 		}
 	};
 }
