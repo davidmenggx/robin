@@ -6,6 +6,7 @@
 #include "robin/generation/transformation.h"
 
 #include <string>
+#include <thread>
 #include <vector>
 
 struct Config {
@@ -25,6 +26,8 @@ struct Config {
 	int camera_center_x_{};
 	int camera_center_y_{};
 	float camera_scale_{ constants::kPixelsPerUnit };
+
+	unsigned int engine_threads_{ std::thread::hardware_concurrency() - 1 };
 
 	bool show_telemetry_{};
 	bool fullscreen_{};

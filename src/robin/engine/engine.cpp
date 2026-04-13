@@ -23,7 +23,7 @@ Engine::Engine(Config& config)
 }
 
 void Engine::run() {
-	unsigned int num_threads{ std::thread::hardware_concurrency() - 1 };
+	unsigned int num_threads{ config_.engine_threads_ };
 	if (num_threads == 0) {
 		num_threads = 4;
 	}

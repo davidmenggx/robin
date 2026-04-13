@@ -25,10 +25,17 @@ static const Transformation& chooseRandomTransformation(
 	// our findIndex function requires two random numbers: an index (size t) and a float
 	// instead i just randomly generate one float and truncate it appropraitely to extract
 	// both values
-	double uniform01{ static_cast<double>(generator()) / static_cast<double>(std::numeric_limits<uint64_t>::max()) };
+	// C++
+	double uniform01{ static_cast<double>(generator()) / (static_cast<double>(std::numeric_limits<uint64_t>::max()) + 1.0) };
 	float combined_random = static_cast<float>(uniform01 * alias_scale);
+
 	std::size_t uniform_idx = static_cast<std::size_t>(combined_random);
+	if (uniform_idx >= alias.probabilities.size()) {
+		uniform_idx = alias.probabilities.size() - 1;
+	}
+
 	float uniform_float = combined_random - static_cast<float>(uniform_idx);
+
 	std::size_t transformation_idx{ findIndex(alias, uniform_float, uniform_idx) };
 
 	return flame.transformations_[transformation_idx];

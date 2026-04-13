@@ -15,13 +15,16 @@ int main(int argc, char** argv) {
 	Config config{};
 
 	// Display real-time performance metrics
-	app.add_flag("-t,--telemetry", config.show_telemetry_, "Show performance statistics");
+	app.add_flag("-s,--show-telemetry", config.show_telemetry_, "Show performance statistics");
 
 	// GUI options
 	app.add_flag("-f,--fullscreen", config.fullscreen_, "Render in full screen");
 	app.add_option("--width", config.gui_width_, "Renderer width");
 	app.add_option("--height", config.gui_height_, "Renderer height");
 	app.add_option("-u,--iterations-per-update", config.iterations_, "Number of iterations per render update");
+
+	// Engine settings
+	app.add_option("-t,--threads", config.engine_threads_, "Number of threads to spawn for rendering engine");
 	
 	// I/O options
 	app.add_option("-i,--input", config.input_name_, "Input filename for transformations (.json)");
