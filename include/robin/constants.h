@@ -16,8 +16,8 @@ namespace constants {
 	inline constexpr int kColorChannels{ 4 };
 
 	// I/O constants
-	inline const std::string kInputFilename{ "input" };
-	inline const std::string kOutputFilename{ "output" };
+	inline const std::string kInputFilename{ "input.json" };
+	inline const std::string kOutputFilename{ "output.json" };
 
 	// runtime telemetry constants
 	inline constexpr int kTelemetryWidth{ 800 };

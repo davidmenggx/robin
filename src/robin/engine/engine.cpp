@@ -55,6 +55,10 @@ void Engine::run() {
 			if (!utils::saveImage(generateTonemap(master_buffer_, config_.gui_width_, config_.gui_height_), config_)) {
 				std::cerr << "Failed to save image output\n";
 			}
+			else {
+				std::cout << std::format("Successfully saved snapshot to path: {}", 
+					config_.output_name_) << '\n';
+			}
 		}
 
 		auto current_time = std::chrono::steady_clock::now();

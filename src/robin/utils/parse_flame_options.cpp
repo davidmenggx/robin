@@ -73,10 +73,10 @@ static std::vector<Transformation> extractTransformations(json data) {
 }
 
 void utils::parseSettings(Config& config) {
-	std::ifstream file(config.input_name_ + ".json");
+	std::ifstream file(config.input_name_);
 
 	if (!file.is_open()) {
-		throw std::invalid_argument{ std::format("Could not open input JSON data from file: {}", config.input_name_) };
+		throw std::invalid_argument{ std::format("Could not open input flame data from file: {}", config.input_name_) };
 	}
 
 	json data{};
