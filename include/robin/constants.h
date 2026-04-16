@@ -17,7 +17,7 @@ namespace constants {
 
 	// I/O constants
 	inline const std::string kInputFilename{ "input.json" };
-	inline const std::string kOutputFilename{ "output.json" };
+	inline const std::string kOutputFilename{ "output" };
 
 	// runtime telemetry constants
 	inline constexpr int kTelemetryWidth{ 800 };
