@@ -10,7 +10,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
 #include <vector>
 
 class Engine {
@@ -20,15 +20,13 @@ public:
 	void run();
 
 private:
-	void flushWorkerBuffer(const Accumulation& local_buffer, uint64_t points_processed);
-
 	Accumulation master_buffer_;
 
 	Renderer renderer_;
 
 	Config& config_;
 
-	std::mutex master_mutex_{};
+	std::shared_mutex master_mutex_{};
 
 	AliasTable alias_{};
 	Flame flame_{};

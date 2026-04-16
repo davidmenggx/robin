@@ -16,8 +16,6 @@ struct Config {
 	std::string input_name_{ constants::kInputFilename };
 	std::string output_name_{ constants::kOutputFilename };
 
-	long long iterations_{ constants::kIterationsPerUpdate };
-
 	Color background_{ constants::kBackground };
 
 	int gui_width_{ constants::kWidth };

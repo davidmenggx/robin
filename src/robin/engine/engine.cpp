@@ -7,13 +7,14 @@
 #include "robin/render/tonemap.h"
 #include "robin/utils/save_image.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <format>
-#include <functional>
 #include <iostream>
 #include <memory>
-#include <mutex>
+#include <random>
+#include <shared_mutex>
 #include <thread>
 
 Engine::Engine(Config& config)
@@ -23,78 +24,67 @@ Engine::Engine(Config& config)
 }
 
 void Engine::run() {
-	unsigned int num_threads{ config_.engine_threads_ };
-	if (num_threads == 0) {
-		num_threads = 4;
-	}
+    unsigned int num_threads{ config_.engine_threads_ };
+    if (num_threads == 0) { 
+        num_threads = std::max(1u, std::thread::hardware_concurrency() - 1);
+    }
 
-	std::cout << std::format("Engine running on {} threads", num_threads) << '\n';
+    std::cout << std::format("Engine running on {} threads\n", num_threads);
 
-	for (unsigned int i{ 0 }; i < num_threads; ++i) {
-		std::function<void(const Accumulation&, uint64_t)> callback = [this](const Accumulation& local_buffer, uint64_t points_processed) {
-			this->flushWorkerBuffer(local_buffer, points_processed);
-			};
+    for (unsigned int i{ 0 }; i < num_threads; ++i) {
+        workers_.push_back(std::make_unique<Worker>(flame_, alias_, config_, master_buffer_, total_points_));
+        workers_.back()->start();
+    }
 
-		workers_.push_back(std::make_unique<Worker>(flame_, alias_, config_, callback));
-		workers_.back()->start();
-	}
+    auto last_telemetry_time = std::chrono::steady_clock::now();
+    auto last_frame_time = std::chrono::steady_clock::now();
+    uint64_t last_telemetry_points{ 0 };
 
-	int frame{ 0 };
+    while (true) {
+        FrameEvents events{ renderer_.fetchUserInput() };
+        if (events.quit_) { 
+            break; 
+        }
 
-	auto last_telemetry_time = std::chrono::steady_clock::now();
-	uint64_t last_telemetry_points{ total_points_.load() };
+        if (events.save_) {
+            std::shared_lock lock(master_mutex_);
 
-	auto last_frame_time = std::chrono::steady_clock::now();
+            auto pixels{ generateTonemap(master_buffer_,
+                config_.gui_width_,
+                config_.gui_height_) };
 
-	while (true) {
-		FrameEvents events{ renderer_.fetchUserInput() };
-		if (events.quit_) break;
+            lock.unlock(); // release before the file write
+            if (!utils::saveImage(pixels, config_)) {
+                std::cerr << "Failed to save image output\n";
+            }
+            else {
+                std::cout << std::format("Saved snapshot to: {}\n", config_.output_name_);
+            }
+        }
 
-		if (events.save_) {
-			std::lock_guard<std::mutex> lock(master_mutex_);
-			if (!utils::saveImage(generateTonemap(master_buffer_, config_.gui_width_, config_.gui_height_), config_)) {
-				std::cerr << "Failed to save image output\n";
-			}
-			else {
-				std::cout << std::format("Successfully saved snapshot to path: {}", 
-					config_.output_name_) << '\n';
-			}
-		}
+        auto now = std::chrono::steady_clock::now();
 
-		auto current_time = std::chrono::steady_clock::now();
-		auto time_since_last_frame = current_time - last_frame_time;
+        if (now - last_frame_time >= std::chrono::milliseconds(16)) {
+            float elapsed{ std::chrono::duration<float>(now - last_telemetry_time).count() };
 
-		// update output around 60 fps
-		if (time_since_last_frame >= std::chrono::milliseconds(16)) {
-			float elapsed_seconds{ std::chrono::duration<float>(current_time - last_telemetry_time).count() };
+            if (elapsed >= 0.25f) {
+                uint64_t current_points{ total_points_.load(std::memory_order_relaxed) };
+                double pps{ (current_points - last_telemetry_points) / elapsed };
+                renderer_.updateTelemetry(current_points, pps);
+                last_telemetry_time = now;
+                last_telemetry_points = current_points;
+            }
 
-			if (elapsed_seconds >= 0.25f) {
-				uint64_t current_points{ total_points_.load() };
-				uint64_t points_processed{ current_points - last_telemetry_points };
-				double points_per_second{ static_cast<double>(points_processed) / elapsed_seconds };
+            {
+                std::shared_lock lock(master_mutex_);
+                renderer_.updateGUI(master_buffer_);
+            }
 
-				renderer_.updateTelemetry(current_points, points_per_second);
+            last_frame_time = now;
+        }
 
-				last_telemetry_time = current_time;
-				last_telemetry_points = current_points;
-			}
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
 
-			{
-				std::lock_guard<std::mutex> lock(master_mutex_);
-				renderer_.updateGUI(master_buffer_);
-			}
-
-			last_frame_time = current_time;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	}
-
-	// cleanup (only works bc i use jthread)
-	workers_.clear();
-}
-
-void Engine::flushWorkerBuffer(const Accumulation& local_buffer, uint64_t points_processed) {
-	std::lock_guard<std::mutex> lock(master_mutex_);
-	master_buffer_.merge(local_buffer);
-	total_points_ += points_processed;
+    workers_.clear(); // jthread stop+join on destruction
 }

@@ -8,13 +8,14 @@
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
 
+#include <atomic>
 #include <cstdint>
-#include <functional>
 #include <limits>
 #include <stop_token>
 #include <thread>
-#include <utility>
 #include <vector>
+
+#include <cstdlib>
 
 static const Transformation& chooseRandomTransformation(
 	AliasTable& alias,
@@ -56,10 +57,10 @@ static Point2D applyVariations(const std::vector<Variation>& variations, float x
 	return { x_accumulated, y_accumulated };
 }
 
-Worker::Worker(const Flame& flame, AliasTable& alias, Config& config,
-	std::function<void(const Accumulation&, uint64_t)> flush_callback)
-	: flame_{ flame }, alias_{ alias }, config_{ config }, buffer_{ config_ }
-	, flush_callback_{ std::move(flush_callback) }, generator_{ 5 } // TODO: choose a better see
+Worker::Worker(const Flame& flame, AliasTable& alias, Config& config, 
+	Accumulation& buffer, std::atomic<uint64_t>& total_points)
+	: flame_{ flame }, alias_{ alias }, config_{ config }
+	, buffer_{ buffer }, total_points_{ total_points }, generator_ { static_cast<uint64_t>(rand()) } // TODO: choose a better seed
 {
 	alias_scale_ = alias_.probabilities.size();
 }
@@ -100,22 +101,19 @@ void Worker::run(std::stop_token stoken) {
 	}
 
 	while (!stoken.stop_requested()) {
-		for (int i{ 0 }; i < config_.iterations_; ++i) {
-			const Transformation& t{
-				chooseRandomTransformation(alias_, generator_, alias_scale_, flame_) };
+		const Transformation& t{
+			chooseRandomTransformation(alias_, generator_, alias_scale_, flame_) };
 
-			float x_affine{ t.factors_.a_ * x + t.factors_.b_ * y + t.factors_.c_ };
-			float y_affine{ t.factors_.d_ * x + t.factors_.e_ * y + t.factors_.f_ };
+		float x_affine{ t.factors_.a_ * x + t.factors_.b_ * y + t.factors_.c_ };
+		float y_affine{ t.factors_.d_ * x + t.factors_.e_ * y + t.factors_.f_ };
 
-			Point2D updated_point{ applyVariations(t.variations_, x_affine, y_affine) };
-			x = updated_point.x_;
-			y = updated_point.y_;
+		Point2D updated_point{ applyVariations(t.variations_, x_affine, y_affine) };
+		x = updated_point.x_;
+		y = updated_point.y_;
 
-			color = (color + t.color_) * 0.5f;
-			buffer_.incrementFrequency(x, y, color);
-		}
+		color = (color + t.color_) * 0.5f;
+		buffer_.markPixelHit(x, y, color);
 
-		flush_callback_(buffer_, config_.iterations_);
-		buffer_.clear();
+		total_points_.fetch_add(1, std::memory_order_relaxed);
 	}
 }

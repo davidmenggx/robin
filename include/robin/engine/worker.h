@@ -6,15 +6,15 @@
 #include "robin/distribution/xoshiro.h"
 #include "robin/generation/flame.h"
 
+#include <atomic>
 #include <cstdint>
-#include <functional>
 #include <stop_token>
 #include <thread>
 
 class Worker {
 public:
 	Worker(const Flame& flame, AliasTable& alias, Config& config, 
-		std::function<void(const Accumulation&, uint64_t)> flush_callback);
+		Accumulation& buffer, std::atomic<uint64_t>& total_points);
 
 	void start();
 
@@ -25,17 +25,17 @@ private:
 	// early so that we don't get weird seg faults in the constructor
 	Config& config_;
 
-	Accumulation buffer_;
+	Accumulation& buffer_;
 
 	AliasTable& alias_;
-
-	std::function<void(const Accumulation&, uint64_t)> flush_callback_{};
 
 	Xoshiro256 generator_;
 
 	const Flame& flame_;
 
 	float alias_scale_{};
+
+	std::atomic<uint64_t>& total_points_;
 
 	// IMPORTANT: the thread must be at the end so the destructor order is preserved
 	std::jthread thread_{};

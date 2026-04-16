@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
 	app.add_flag("-f,--fullscreen", config.fullscreen_, "Render in full screen");
 	app.add_option("--width", config.gui_width_, "Renderer width");
 	app.add_option("--height", config.gui_height_, "Renderer height");
-	app.add_option("-u,--iterations-per-update", config.iterations_, "Number of iterations per render update");
 
 	// Engine settings
 	app.add_option("-t,--threads", config.engine_threads_, "Number of threads to spawn for rendering engine");

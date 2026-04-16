@@ -5,6 +5,7 @@
 #include "robin/generation/transformation.h"
 #include "robin/generation/variation.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -25,7 +26,6 @@ namespace constants {
 	inline constexpr int kTelemetryHistorySize{ 100 }; // how many samples saved
 	inline constexpr int kTelemetryTicks{ 4 };
 
-	inline constexpr long long kIterationsPerUpdate{ 1'000'000ll };
 	inline constexpr int kFramesPerUpdate{ 10 };
 
 	// rendering constants:
@@ -72,4 +72,8 @@ namespace constants {
 			{ 0.60f,  0.40f,  0.00f, -0.40f,  0.60f,  1.20f}, 1.0f, 1.0f
 		}
 	};
+
+	// I switched to using long longs instead of floats to represent color. to maintain a wide
+	// range of colors, multiply everything up by a fixed scale
+	inline constexpr uint64_t kFixedScale{ 16'777'216LL };
 }
