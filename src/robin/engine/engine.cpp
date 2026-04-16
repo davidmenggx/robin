@@ -28,7 +28,7 @@ void Engine::run() {
 		num_threads = 4;
 	}
 
-	std::cout << std::format("Engine running on {} threads", num_threads) << '\n';
+	std::cout << std::format("Engine running on {} threads\n", num_threads);
 
 	for (unsigned int i{ 0 }; i < num_threads; ++i) {
 		std::function<void(const Accumulation&, uint64_t)> callback = [this](const Accumulation& local_buffer, uint64_t points_processed) {
@@ -56,8 +56,8 @@ void Engine::run() {
 				std::cerr << "Failed to save image output\n";
 			}
 			else {
-				std::cout << std::format("Successfully saved snapshot to path: {}", 
-					config_.output_name_) << '\n';
+				std::cout << std::format("Successfully saved snapshot to path: {}\n", 
+					config_.output_name_);
 			}
 		}
 

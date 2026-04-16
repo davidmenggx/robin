@@ -21,6 +21,8 @@ public:
 private:
 	void run(std::stop_token stoken);
 
+	static uint64_t generate_random_seed();
+
 	// unfortunately for padding the config needs to be initialized rather
 	// early so that we don't get weird seg faults in the constructor
 	Config& config_;
@@ -36,6 +38,8 @@ private:
 	const Flame& flame_;
 
 	float alias_scale_{};
+
+	float iteration_noise_{ 1.0f };
 
 	// IMPORTANT: the thread must be at the end so the destructor order is preserved
 	std::jthread thread_{};

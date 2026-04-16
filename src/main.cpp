@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 		utils::parseSettings(config);
 	}
 	catch (std::exception& e) {
-		std::cerr << std::format("Failed to load flame JSON data: {}", e.what()) << '\n';
+		std::cerr << std::format("Failed to load flame JSON data: {}\n", e.what());
 	}
 
 	Engine engine{ config };

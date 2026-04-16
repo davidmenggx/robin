@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <random>
 #include <stop_token>
 #include <thread>
 #include <utility>
@@ -56,12 +57,20 @@ static Point2D applyVariations(const std::vector<Variation>& variations, float x
 	return { x_accumulated, y_accumulated };
 }
 
+uint64_t Worker::generate_random_seed() {
+	std::random_device rd{};
+	return (static_cast<uint64_t>(rd()) << 32) | rd();
+}
+
 Worker::Worker(const Flame& flame, AliasTable& alias, Config& config,
 	std::function<void(const Accumulation&, uint64_t)> flush_callback)
 	: flame_{ flame }, alias_{ alias }, config_{ config }, buffer_{ config_ }
-	, flush_callback_{ std::move(flush_callback) }, generator_{ 5 } // TODO: choose a better see
+	, flush_callback_{ std::move(flush_callback) }, generator_{ generate_random_seed()}
 {
 	alias_scale_ = alias_.probabilities.size();
+
+	std::uniform_real_distribution<float> dist(1.0f, 10.0f);
+	iteration_noise_ = dist(generator_);
 }
 
 void Worker::start() {
@@ -99,8 +108,10 @@ void Worker::run(std::stop_token stoken) {
 		color = (color + transformation.color_) * 0.5f;
 	}
 
+	int iterations_per_update{ static_cast<int>(config_.iterations_ * iteration_noise_) };
+
 	while (!stoken.stop_requested()) {
-		for (int i{ 0 }; i < config_.iterations_; ++i) {
+		for (int i{ 0 }; i < iterations_per_update; ++i) {
 			const Transformation& t{
 				chooseRandomTransformation(alias_, generator_, alias_scale_, flame_) };
 
@@ -115,7 +126,7 @@ void Worker::run(std::stop_token stoken) {
 			buffer_.incrementFrequency(x, y, color);
 		}
 
-		flush_callback_(buffer_, config_.iterations_);
+		flush_callback_(buffer_, iterations_per_update);
 		buffer_.clear();
 	}
 }
