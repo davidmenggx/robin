@@ -95,3 +95,9 @@ The latest implementation (release v2.0.0) achieves ***40 - 50 million engine it
 2) Give each worker a separate image buffer to operate on, then join periodically with the main thread. ***This was over 1.5 times faster than having all workers operate on a single image buffer of atomics, largely due to optimization 1 (above)***
 3) Introduce random noise to number of iterations each worker performed, ***increasing average CPU utilization by 16%***
 4) [Experimental, marginal image quality degradation] Cache results of gradient color lookup for pixels within a similar region. Previously, this color lookup was highly memory bound, resulting in an **L2 cache miss 82% of the time**
+
+---
+**Benchmark environment:**
+- **CPU:** Intel(R) Core(TM) Ultra 7 258V
+- **RAM:** 32GB LPDDR5
+- **OS:** Windows 11 Pro 25H2
